@@ -13,6 +13,7 @@
  along with this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.en.html>.
  */
 
+#import "HelpViewController.h"//添加帮助URL
 #import "LoginViewController.h"
 #import "AppDelegate.h"
 #import "UserDto.h"
@@ -686,7 +687,8 @@ NSString *loginViewControllerRotate = @"loginViewControllerRotate";
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
 {
     if(k_hide_url_server) {
-        return 2;
+//        return 2;
+        return 3;//添加帮助URL
     } else {
         return 3;
     }
@@ -697,6 +699,10 @@ NSString *loginViewControllerRotate = @"loginViewControllerRotate";
 // Returns the table view managed by the controller object.
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
+    if (section == 2) {//添加帮助URL
+        return 1;
+    }
+    
     NSInteger n = 0;
     
     if(k_hide_url_server) {
@@ -882,7 +888,11 @@ NSString *loginViewControllerRotate = @"loginViewControllerRotate";
         
         switch (indexPath.row) {
             case 0:
-                cell = [self configureCellToLoginByAccountCell:cell];
+//                cell = [self configureCellToLoginByAccountCell:cell];
+                cell.textLabel.textAlignment = NSTextAlignmentCenter;//添加帮助URL
+                cell.textLabel.text= NSLocalizedString(@"首次登陆请看这里!!!", nil);
+                cell.textLabel.textColor = [UIColor blueColor];
+                cell.backgroundColor = [UIColor clearColor];
                 
                 break;
                 
@@ -1166,6 +1176,14 @@ NSString *loginViewControllerRotate = @"loginViewControllerRotate";
                     break;
             }
         }
+        else if (indexPath.section == 2) {//添加帮助URL
+            HelpViewController *helpViewController = [[HelpViewController alloc] initWithNibName:@"WebViewController" bundle:nil];
+            helpViewController.navigationTitleString = @"首次登陆帮助";
+            helpViewController.urlString = @"https://site.bistu.edu.cn/iflab/owncloud_help/";
+            UINavigationController *nav = [[UINavigationController alloc] initWithRootViewController:helpViewController];
+            [self presentViewController:nav animated:YES completion:nil];
+        }
+        
     } else {
         //show url
         switch (indexPath.section) {

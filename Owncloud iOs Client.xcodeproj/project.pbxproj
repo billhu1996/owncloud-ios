@@ -667,6 +667,7 @@
 		908A3C701D019EDD00A34FDB /* file_synchronizing_icon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 9064143E1D005B5C000AEFE5 /* file_synchronizing_icon@2x.png */; };
 		90D608FA1C89844E0049CCE4 /* SortManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 905B3D3A1C8867AA00BCC93B /* SortManager.m */; };
 		90D608FC1C8984760049CCE4 /* SortManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 905B3D3A1C8867AA00BCC93B /* SortManager.m */; };
+		A90125CA1EF58EB5009205A8 /* HelpViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = A90125C91EF58EB5009205A8 /* HelpViewController.m */; };
 		A9A3F6611EF4D0EE00AA33C7 /* HBServerURL.m in Sources */ = {isa = PBXBuildFile; fileRef = A9A3F6601EF4D0EE00AA33C7 /* HBServerURL.m */; };
 		BC7765951EDD7C1500E32D89 /* PresentedViewUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = BC7765941EDD7C1500E32D89 /* PresentedViewUtils.m */; };
 		BC855ACD1E0D4B0200998CB7 /* FLAnimatedImage.m in Sources */ = {isa = PBXBuildFile; fileRef = BC855ACA1E0D4B0200998CB7 /* FLAnimatedImage.m */; };
@@ -1741,6 +1742,8 @@
 		9069EAA61CF5F07200810996 /* OCLoadingSpinner.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = OCLoadingSpinner.m; path = Utils/OCLoadingSpinner.m; sourceTree = "<group>"; };
 		908A3C5A1D016FE500A34FDB /* file_available_offline_icon@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "file_available_offline_icon@2x.png"; sourceTree = "<group>"; };
 		908A3C5C1D01732C00A34FDB /* file_available_offline_icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = file_available_offline_icon.png; sourceTree = "<group>"; };
+		A90125C81EF58EB5009205A8 /* HelpViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HelpViewController.h; sourceTree = "<group>"; };
+		A90125C91EF58EB5009205A8 /* HelpViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = HelpViewController.m; sourceTree = "<group>"; };
 		A9A3F65F1EF4D0EE00AA33C7 /* HBServerURL.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HBServerURL.h; sourceTree = "<group>"; };
 		A9A3F6601EF4D0EE00AA33C7 /* HBServerURL.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = HBServerURL.m; sourceTree = "<group>"; };
 		BC7765931EDD7C1500E32D89 /* PresentedViewUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PresentedViewUtils.h; path = Utils/PresentedViewUtils.h; sourceTree = "<group>"; };
@@ -2479,6 +2482,8 @@
 				1420C3A7178A9F5000C0455C /* LoginViewController_iPhone.xib */,
 				1420C3A8178A9F5000C0455C /* LoginViewController.h */,
 				1420C3A9178A9F5000C0455C /* LoginViewController.m */,
+				A90125C81EF58EB5009205A8 /* HelpViewController.h */,
+				A90125C91EF58EB5009205A8 /* HelpViewController.m */,
 			);
 			name = Login;
 			sourceTree = "<group>";
@@ -4905,6 +4910,7 @@
 				400787721C44F4D400486A26 /* ShareEditUserViewController.m in Sources */,
 				1467037519372ACC00087289 /* DownloadUtils.m in Sources */,
 				400A63711B4FD75600890579 /* IFTTTHideAnimation.m in Sources */,
+				A90125CA1EF58EB5009205A8 /* HelpViewController.m in Sources */,
 				599D80A21A23366D0071B66E /* SimpleFileListTableViewController.m in Sources */,
 				EA0EFA1F1BEA6C6E009971AF /* ManageCapabilitiesDB.m in Sources */,
 				148DD6FE17786BF200FB9977 /* FileNameUtils.m in Sources */,
