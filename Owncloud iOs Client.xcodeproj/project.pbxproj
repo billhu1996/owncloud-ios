@@ -667,6 +667,7 @@
 		908A3C701D019EDD00A34FDB /* file_synchronizing_icon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 9064143E1D005B5C000AEFE5 /* file_synchronizing_icon@2x.png */; };
 		90D608FA1C89844E0049CCE4 /* SortManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 905B3D3A1C8867AA00BCC93B /* SortManager.m */; };
 		90D608FC1C8984760049CCE4 /* SortManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 905B3D3A1C8867AA00BCC93B /* SortManager.m */; };
+		A9A3F6611EF4D0EE00AA33C7 /* HBServerURL.m in Sources */ = {isa = PBXBuildFile; fileRef = A9A3F6601EF4D0EE00AA33C7 /* HBServerURL.m */; };
 		BC7765951EDD7C1500E32D89 /* PresentedViewUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = BC7765941EDD7C1500E32D89 /* PresentedViewUtils.m */; };
 		BC855ACD1E0D4B0200998CB7 /* FLAnimatedImage.m in Sources */ = {isa = PBXBuildFile; fileRef = BC855ACA1E0D4B0200998CB7 /* FLAnimatedImage.m */; };
 		BC855ACE1E0D4B0200998CB7 /* FLAnimatedImageView.m in Sources */ = {isa = PBXBuildFile; fileRef = BC855ACC1E0D4B0200998CB7 /* FLAnimatedImageView.m */; };
@@ -1740,6 +1741,8 @@
 		9069EAA61CF5F07200810996 /* OCLoadingSpinner.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = OCLoadingSpinner.m; path = Utils/OCLoadingSpinner.m; sourceTree = "<group>"; };
 		908A3C5A1D016FE500A34FDB /* file_available_offline_icon@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "file_available_offline_icon@2x.png"; sourceTree = "<group>"; };
 		908A3C5C1D01732C00A34FDB /* file_available_offline_icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = file_available_offline_icon.png; sourceTree = "<group>"; };
+		A9A3F65F1EF4D0EE00AA33C7 /* HBServerURL.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HBServerURL.h; sourceTree = "<group>"; };
+		A9A3F6601EF4D0EE00AA33C7 /* HBServerURL.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = HBServerURL.m; sourceTree = "<group>"; };
 		BC7765931EDD7C1500E32D89 /* PresentedViewUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PresentedViewUtils.h; path = Utils/PresentedViewUtils.h; sourceTree = "<group>"; };
 		BC7765941EDD7C1500E32D89 /* PresentedViewUtils.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = PresentedViewUtils.m; path = Utils/PresentedViewUtils.m; sourceTree = "<group>"; };
 		BC855AC91E0D4B0200998CB7 /* FLAnimatedImage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = FLAnimatedImage.h; path = ExternalLibreries/FLAnimatedimage/FLAnimatedImage.h; sourceTree = "<group>"; };
@@ -2115,6 +2118,7 @@
 		1324298315ADBB3700DF823E /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
+				A9A3F65E1EF4D0EE00AA33C7 /* ServerURL */,
 				EA421B911B021A0300E4071F /* Accessibility */,
 				1487F15D177C35AA004A1A5A /* Images */,
 				EAF028B3177447530035084D /* FMDB */,
@@ -3399,6 +3403,16 @@
 			);
 			name = "Recent Tab";
 			sourceTree = "<group>";
+		};
+		A9A3F65E1EF4D0EE00AA33C7 /* ServerURL */ = {
+			isa = PBXGroup;
+			children = (
+				A9A3F65F1EF4D0EE00AA33C7 /* HBServerURL.h */,
+				A9A3F6601EF4D0EE00AA33C7 /* HBServerURL.m */,
+			);
+			name = ServerURL;
+			path = serverURL/serverURL/ServerURL;
+			sourceTree = SOURCE_ROOT;
 		};
 		BC855AC71E0D4AE100998CB7 /* FLAnimatedImage */ = {
 			isa = PBXGroup;
@@ -4927,6 +4941,7 @@
 				BC7765951EDD7C1500E32D89 /* PresentedViewUtils.m in Sources */,
 				400A63761B4FD75600890579 /* IFTTTScrollViewPageConstraintAnimation.m in Sources */,
 				EAD281BC1A38BB2E00A00D54 /* DPDownload.m in Sources */,
+				A9A3F6611EF4D0EE00AA33C7 /* HBServerURL.m in Sources */,
 				1428F675178422AE0092F42A /* UploadsOfflineDto.m in Sources */,
 				EA1787AC17E33BB9005171AB /* OCNavigationController.m in Sources */,
 				596C060C1CF47278004BCF51 /* ELCConsole.m in Sources */,

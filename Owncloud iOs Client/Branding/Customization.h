@@ -12,7 +12,7 @@
  You should have received a copy of this license
  along with this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.en.html>.
  */
-
+#import "HBServerURL.h"
 
 //app year
 #define k_year 2017
@@ -26,7 +26,7 @@
 #define k_hide_url_server YES
 
 //Set a default url server. It must be obligaroy if we hide the url server (#define k_hide_url_server YES)
-#define k_default_url_server @"https://panweb.bistu.edu.cn"
+#define k_default_url_server [HBServerURL getWithURL:@"https://api.iflab.org/api/v2/serverurl/_table/serverurl/" apikey:@"c4c6a2a605c559a089f785394561919eecf2c548b631f3256678870f07691b50"]
 
 //force override existing accounts with k_default_url_server. It must be obligatory if we change authentication type (k_is_sso_active)
 #define k_force_update_of_server_url NO
