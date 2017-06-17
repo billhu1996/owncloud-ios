@@ -35,7 +35,7 @@
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
-    self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
+    self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil andLoginMode:LoginModeCreate];
     if (self) {
         // Custom initialization
        if (!IS_IPHONE) {
@@ -45,11 +45,6 @@
         
     }
     return self;
-}
-
-- (void)setTableBackGroundColor {
-    [self.tableView setBackgroundView: nil];
-    [self.tableView setBackgroundColor:[UIColor colorOfLoginBackground]];
 }
 
 - (void) viewWillAppear:(BOOL)animated {
@@ -107,10 +102,6 @@
     [self addEditAccountsViewiPad];
 }
 
--(void)internazionaliceTheInitialInterface {
-    self.loginButtonString = NSLocalizedString(@"add_account", nil);
-}
-
 
 ///-----------------------------------
 /// @name Create data with server data
@@ -129,10 +120,8 @@
     //DLog(@"Request Did Fetch Directory Listing And Test Authetification");
     
     if(requestCode >= 400) {
-        isError500 = YES;
-        [self hideTryingToLogin];
-        
-        [self.tableView reloadData];
+        [self.manageNetworkErrors returnErrorMessageWithHttpStatusCode:requestCode
+                                                              andError:nil];
     } else {
         
         UserDto *userDto = [[UserDto alloc] init];
@@ -163,12 +152,13 @@
         userDto.activeaccount = NO;
         AppDelegate *app = (AppDelegate*)[[UIApplication sharedApplication] delegate];
         userDto.urlRedirected = app.urlServerRedirected;
+        userDto.predefinedUrl = k_default_url_server;
         
         [self hideTryingToLogin];
         
         if([ManageUsersDB isExistUser:userDto]) {
-            UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:NSLocalizedString(@"user_exist", nil) message:@"" delegate:self cancelButtonTitle:NSLocalizedString(@"ok", nil) otherButtonTitles:nil, nil];
-            [alertView show];
+
+            [self showError:NSLocalizedString(@"user_exist", nil)];
             
             //1- Clean the cookies after login or not before go with the active user
             [UtilsFramework deleteAllCookies];

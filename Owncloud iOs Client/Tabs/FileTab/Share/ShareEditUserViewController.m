@@ -7,7 +7,7 @@
 //
 
 /*
- Copyright (C) 2016, ownCloud GmbH.
+ Copyright (C) 2017, ownCloud GmbH.
  This code is covered by the GNU Public License Version 3.
  For distribution utilizing Apple mechanisms please see https://owncloud.org/contribute/iOS-license-exception/
  You should have received a copy of this license
@@ -305,7 +305,7 @@ typedef NS_ENUM (NSInteger, enumUpload){
             shareUserPrivilegeCell = (ShareUserPrivilegeCell *)[topLevelObjects objectAtIndex:0];
         }
         
-        shareUserPrivilegeCell.fileName.text = [self.updatedOCShare.shareWithDisplayName stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+        shareUserPrivilegeCell.fileName.text = [self.updatedOCShare.shareWithDisplayName stringByRemovingPercentEncoding];
         
         cell = shareUserPrivilegeCell;
         
@@ -406,6 +406,7 @@ typedef NS_ENUM (NSInteger, enumUpload){
     if (section == 1 || section == 2) {
         
         ShareLinkHeaderCell* shareLinkHeaderCell = [tableView dequeueReusableCellWithIdentifier:shareLinkHeaderIdentifier];
+        shareLinkHeaderCell.addButtonSection.hidden = YES;
         
         if (shareLinkHeaderCell == nil) {
             NSArray *topLevelObjects = [[NSBundle mainBundle] loadNibNamed:shareLinkHeaderNib owner:self options:nil];
@@ -423,6 +424,7 @@ typedef NS_ENUM (NSInteger, enumUpload){
             [shareLinkHeaderCell.switchSection addTarget:self action:@selector(canShareSwitchValueChanged:) forControlEvents:UIControlEventValueChanged];
         }
         
+        shareLinkHeaderCell.addButtonSection.hidden = YES;
         
         headerView = shareLinkHeaderCell.contentView;
         
@@ -589,8 +591,6 @@ typedef NS_ENUM (NSInteger, enumUpload){
     
     [self performSelector:@selector(showEditAccount) withObject:nil afterDelay:animationsDelay];
     
-    [self performSelector:@selector(showErrorAccount) withObject:nil afterDelay:largeDelay];
-    
 }
 
 
@@ -601,8 +601,7 @@ typedef NS_ENUM (NSInteger, enumUpload){
 #ifdef CONTAINER_APP
     
     //Edit Account
-    self.resolveCredentialErrorViewController = [[EditAccountViewController alloc]initWithNibName:@"EditAccountViewController_iPhone" bundle:nil andUser:[ManageUsersDB getActiveUser]];
-    [self.resolveCredentialErrorViewController setBarForCancelForLoadingFromModal];
+    self.resolveCredentialErrorViewController = [[EditAccountViewController alloc]initWithNibName:@"EditAccountViewController_iPhone" bundle:nil andUser:[ManageUsersDB getActiveUser] andLoginMode:LoginModeExpire];
     
     if (IS_IPHONE) {
         OCNavigationController *navController = [[OCNavigationController alloc] initWithRootViewController:self.resolveCredentialErrorViewController];
@@ -620,23 +619,6 @@ typedef NS_ENUM (NSInteger, enumUpload){
     
 }
 
-- (void) showErrorAccount {
-    
-    if (k_is_sso_active) {
-        [self showErrorWithTitle:NSLocalizedString(@"session_expired", nil)];
-    }else{
-        [self showErrorWithTitle:NSLocalizedString(@"error_login_message", nil)];
-    }
-    
-}
-
-- (void)showErrorWithTitle: (NSString *)title {
-    
-    UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:title message:@"" delegate:self cancelButtonTitle:NSLocalizedString(@"ok", nil) otherButtonTitles:nil, nil];
-    [alertView show];
-    
-    
-}
 
 #pragma mark - UIGestureRecognizer delegate
 

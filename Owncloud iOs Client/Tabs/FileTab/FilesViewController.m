@@ -6,7 +6,7 @@
 //
 
 /*
- Copyright (C) 2016, ownCloud GmbH.
+ Copyright (C) 2017, ownCloud GmbH.
  This code is covered by the GNU Public License Version 3.
  For distribution utilizing Apple mechanisms please see https://owncloud.org/contribute/iOS-license-exception/
  You should have received a copy of this license
@@ -64,6 +64,7 @@
 #import "CheckCapabilities.h"
 #import "SortManager.h"
 #import "EditFileViewController.h"
+#import "CheckFeaturesSupported.h"
 
 //Constant for iOS7
 #define k_status_bar_height 20
@@ -93,17 +94,6 @@
 }
 
 #pragma mark Init Methods
-
-- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
-{
-    self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
-    if (self) {
-        
-    }
-    return self;
-}
-
-
 /*
  * Init Method to load the view from a nib with an array of files
  */
@@ -130,7 +120,6 @@
   //  DLog(@"self.fileIdToShowFiles: %ld", (long)_fileIdToShowFiles.idFile);
     
     _showLoadingAfterChangeUser = NO;
-    _checkingEtag = NO;
     ((CheckAccessToServer *)[CheckAccessToServer sharedManager]).delegate = self;
     
     //We check if the user have root folder at true on the DB
@@ -170,7 +159,7 @@
     
     //We set the currentLocalFolder when the folder is not the root
     if(_fileIdToShowFiles.idFile != 0) {
-        _currentLocalFolder = [NSString stringWithFormat:@"%@%@", _currentLocalFolder, [_fileIdToShowFiles.fileName stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding]];
+        _currentLocalFolder = [NSString stringWithFormat:@"%@%@", _currentLocalFolder, [_fileIdToShowFiles.fileName stringByRemovingPercentEncoding]];
         DLog(@"CurrentLocalFolder: %@", _currentLocalFolder);
     }
     
@@ -266,16 +255,10 @@
     
     self.willLayoutSubviews = true;
     
-    if (IS_IOS8 || IS_IOS9) {
-        self.edgesForExtendedLayout = UIRectEdgeAll;
-        self.extendedLayoutIncludesOpaqueBars = true;
-        self.automaticallyAdjustsScrollViewInsets = true;
-    }else{
-        self.edgesForExtendedLayout = UIRectEdgeAll;
-    }
-    
-    //Flag to know when the view change automatic to root view
-    BOOL isGoToRootView = NO;
+    self.edgesForExtendedLayout = UIRectEdgeAll;
+    self.extendedLayoutIncludesOpaqueBars = true;
+    self.automaticallyAdjustsScrollViewInsets = true;
+
     
     //Appear the tabBar
     self.tabBarController.tabBar.hidden=NO;
@@ -283,12 +266,39 @@
     AppDelegate *app = (AppDelegate *)[[UIApplication sharedApplication] delegate];
     UserDto *currentUser = [ManageUsersDB getActiveUser];
     //ErrorLogin
-    app.isErrorLoginShown = NO;
+    if ([UtilsUrls isNecessaryUpdateToPredefinedUrlByPreviousUrl:currentUser.predefinedUrl]) {
+        [self errorLogin];
+    }
     
     app.currentViewVisible = self;
     
+    // if we are migrating the url no relaunch pending uploads
+    if (![UtilsUrls isNecessaryUpdateToPredefinedUrlByPreviousUrl:app.activeUser.predefinedUrl]) {
+        
+        [self initFilesView];
+        
+    }
+
+    //Assign this class to presentFilesViewController
+    app.presentFilesViewController=self;
+    
+    //Add loading screen if it's necessary (Used by restoring the loading view after a rotate when the uploading processing)
+    if (app.isLoadingVisible==YES) {
+        [self initLoading];
+        
+    }
+
+}
+
+- (void)initFilesView {
+    AppDelegate *app = (AppDelegate *)[[UIApplication sharedApplication] delegate];
+    UserDto *currentUser = [ManageUsersDB getActiveUser];
+    //Flag to know when the view change automatic to root view
+    BOOL isGoToRootView = NO;
+    
     //Relaunch the uploads that failed before
     [app performSelector:@selector(relaunchUploadsFailedNoForced) withObject:nil afterDelay:5.0];
+    
     
     //If it is the root folder show the name of root folder
     if(self.fileIdToShowFiles.isRootFolder) {
@@ -307,7 +317,7 @@
          currentUser.idUser == _mUser.idUser)) {
         //We are changing of user
         //Show the file list in the correct place
-        [_tableView setContentOffset:CGPointMake(0,0) animated:animated];
+        [self.tableView setContentOffset:CGPointMake(0,0) animated:YES];
         
         //We check if the user have root folder at true on the DB
         if([ManageFilesDB isExistRootFolderByUser:app.activeUser]) {
@@ -331,7 +341,7 @@
         } else {
             //Set this flag to yes, to indicate that the user change the account and this view should be dissaper
             isGoToRootView=YES;
-            [self.navigationController popToRootViewControllerAnimated:animated];
+            [self.navigationController popToRootViewControllerAnimated:YES];
         }
         
         _currentRemoteFolder = [UtilsUrls getFullRemoteServerPathWithWebDav:currentUser];
@@ -360,17 +370,16 @@
     _mUser = currentUser;
     
     if(_isEtagRequestNecessary && isGoToRootView==NO) {
-        _checkingEtag = YES;
         
         //Refresh the shared data
         [self refreshSharedPath];
         
         //Checking the etag
         NSString *path = _currentRemoteFolder;
-        path = [path stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+        path = [path stringByRemovingPercentEncoding];
         
         [[AppDelegate sharedOCCommunication] readFile:path onCommunication:[AppDelegate sharedOCCommunication] successRequest:^(NSHTTPURLResponse *response, NSArray *items, NSString *redirectedServer) {
-
+            
             if (currentUser.idUser == app.activeUser.idUser) {
                 DLog(@"Operation response code: %ld", (long)response.statusCode);
                 
@@ -416,7 +425,7 @@
             if (!isSamlCredentialsError) {
                 [self manageServerErrors:response.statusCode and:error];
             }
-        
+            
         }];
         
     } else {
@@ -454,7 +463,7 @@
         }
         
         //Is directory
-        NSString *folderName =  [currentFolder.fileName stringByReplacingPercentEscapesUsingEncoding:(NSStringEncoding)NSUTF8StringEncoding];
+        NSString *folderName =  [currentFolder.fileName stringByRemovingPercentEncoding];
         
         //Quit the last character, the slash (/)
         folderName = [folderName substringToIndex:[folderName length]-1];
@@ -469,7 +478,7 @@
         // in MyTableViewController's tableView:didSelectRowAtIndexPath method...
         UIBarButtonItem *backButton = [[UIBarButtonItem alloc]
                                        initWithImage:[UIImage imageNamed:[FileNameUtils getTheNameOfTheBrandImage]]
-                                       style:UIBarButtonItemStyleBordered
+                                       style:UIBarButtonItemStylePlain
                                        target:nil
                                        action:nil];
         
@@ -478,7 +487,7 @@
     } else if(_fileIdToShowFiles.isRootFolder) {
         UIBarButtonItem *backButton = [[UIBarButtonItem alloc]
                                        initWithImage:[UIImage imageNamed:@""]
-                                       style:UIBarButtonItemStyleBordered
+                                       style:UIBarButtonItemStylePlain
                                        target:nil
                                        action:nil];
         NSString *appName = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleDisplayName"];
@@ -487,7 +496,7 @@
     } else {
         UIBarButtonItem *backButton = [[UIBarButtonItem alloc]
                                        initWithImage:[UIImage imageNamed:@""]
-                                       style:UIBarButtonItemStyleBordered
+                                       style:UIBarButtonItemStylePlain
                                        target:nil
                                        action:nil];
         self.navigationItem.backBarButtonItem = backButton;
@@ -496,16 +505,6 @@
     // Deselect the selected row
     NSIndexPath *indexPath = [_tableView indexPathForSelectedRow];
     [_tableView deselectRowAtIndexPath:indexPath animated:YES];
-    
-    //Assign this class to presentFilesViewController
-    app.presentFilesViewController=self;
-    
-    //Add loading screen if it's necessary (Used by restoring the loading view after a rotate when the uploading processing)
-    if (app.isLoadingVisible==YES) {
-        [self initLoading];
-        
-    }
-
 }
 
 // Notifies the view controller that its view is about to be removed from a view hierarchy.
@@ -545,7 +544,6 @@
 {
     [super viewDidUnload];
     // Release any retained subviews of the main view.
-
 }
 
 
@@ -553,24 +551,22 @@
 {
      [super viewDidLayoutSubviews];
     
-    if (IS_IOS8 || IS_IOS9) {
-        if ([self.tableView respondsToSelector:@selector(setSeparatorInset:)]) {
-            [self.tableView setSeparatorInset:UIEdgeInsetsMake(0, 10, 0, 0)];
-        }
-        
-        if ([self.tableView respondsToSelector:@selector(setLayoutMargins:)]) {
-            [self.tableView setLayoutMargins:UIEdgeInsetsZero];
-        }
-        
-        
-        CGRect rect = self.navigationController.navigationBar.frame;
-        float y = rect.size.height + rect.origin.y;
-        self.tableView.contentInset = UIEdgeInsetsMake(y,0,0,0);
-        
-        if (self.didLayoutSubviews == false){
-            self.didLayoutSubviews = true;
-            [self viewDidAppear:true];
-        }
+    if ([self.tableView respondsToSelector:@selector(setSeparatorInset:)]) {
+        [self.tableView setSeparatorInset:UIEdgeInsetsMake(0, 10, 0, 0)];
+    }
+    
+    if ([self.tableView respondsToSelector:@selector(setLayoutMargins:)]) {
+        [self.tableView setLayoutMargins:UIEdgeInsetsZero];
+    }
+    
+    
+    CGRect rect = self.navigationController.navigationBar.frame;
+    float y = rect.size.height + rect.origin.y;
+    self.tableView.contentInset = UIEdgeInsetsMake(y,0,0,0);
+    
+    if (self.didLayoutSubviews == false){
+        self.didLayoutSubviews = true;
+        [self viewDidAppear:true];
     }
 }
 
@@ -581,23 +577,16 @@
         self.willLayoutSubviews = true;
         [self viewWillAppear:true];
     }
-    
-    
-    
 }
 
 -(void)tableView:(UITableView *)tableView willDisplayCell:(UITableViewCell *)cell forRowAtIndexPath:(NSIndexPath *)indexPath
 {
+    if ([self.tableView respondsToSelector:@selector(setSeparatorInset:)]) {
+        [self.tableView setSeparatorInset:UIEdgeInsetsMake(0, 10, 0, 0)];
+    }
     
-    if (IS_IOS8 || IS_IOS9) {
-        if ([self.tableView respondsToSelector:@selector(setSeparatorInset:)]) {
-            [self.tableView setSeparatorInset:UIEdgeInsetsMake(0, 10, 0, 0)];
-        }
-        
-        if ([self.tableView respondsToSelector:@selector(setLayoutMargins:)]) {
-            [self.tableView setLayoutMargins:UIEdgeInsetsZero];
-        }
-        
+    if ([self.tableView respondsToSelector:@selector(setLayoutMargins:)]) {
+        [self.tableView setLayoutMargins:UIEdgeInsetsZero];
     }
 }
 
@@ -866,7 +855,7 @@
 -(BOOL)checkForSameName:(NSString *)string
 {
     string = [string stringByAppendingString:@"/"];
-    string = [string stringByReplacingPercentEscapesUsingEncoding:(NSStringEncoding)NSUTF8StringEncoding];
+    string = [string stringByRemovingPercentEncoding];
     
     NSString *dicName;
     
@@ -877,7 +866,7 @@
         //DLog(@"%@", fileDto.fileName);       
         
         dicName=fileDto.fileName;
-        dicName=[dicName stringByReplacingPercentEscapesUsingEncoding:(NSStringEncoding)NSUTF8StringEncoding];        
+        dicName=[dicName stringByRemovingPercentEncoding];        
         
         if([string isEqualToString:dicName]) {
             return YES;
@@ -913,7 +902,7 @@
             NSString *newURL = [NSString stringWithFormat:@"%@%@",self.currentRemoteFolder,[name encodeString:NSUTF8StringEncoding]];
             NSString *rootPath = [UtilsUrls getFilePathOnDBByFullPath:newURL andUser:app.activeUser];
             
-            NSString *pathOfNewFolder = [NSString stringWithFormat:@"%@%@",[self.currentRemoteFolder stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding], name ];
+            NSString *pathOfNewFolder = [NSString stringWithFormat:@"%@%@",[self.currentRemoteFolder stringByRemovingPercentEncoding], name ];
             
             [[AppDelegate sharedOCCommunication] createFolder:pathOfNewFolder onCommunication:[AppDelegate sharedOCCommunication] withForbiddenCharactersSupported:[ManageUsersDB hasTheServerOfTheActiveUserForbiddenCharactersSupport] successRequest:^(NSHTTPURLResponse *response, NSString *redirectedServer) {
                 DLog(@"Folder created");
@@ -949,7 +938,7 @@
                 }
  
             } errorBeforeRequest:^(NSError *error) {
-                if (error.code == OCErrorForbidenCharacters) {
+                if (error.code == OCErrorForbiddenCharacters) {
                     [self endLoading];
                     DLog(@"The folder have problematic characters");
                     
@@ -1170,7 +1159,7 @@
     
     NSString *path = _nextRemoteFolder;
     
-    path = [path stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+    path = [path stringByRemovingPercentEncoding];
     
     if (!app.userSessionCurrentToken) {
         app.userSessionCurrentToken = [UtilsFramework getUserSessionToken];
@@ -1303,8 +1292,7 @@
     _selectedFileDto = selectedFile;
     
     if (IS_IPHONE){
-        
-        [self goToSelectedFileOrFolder:selectedFile];
+        [self goToSelectedFileOrFolder:selectedFile andForceDownload:NO];
     } else {
         
         //Select in detail view
@@ -1320,7 +1308,7 @@
             //Select in detail
             AppDelegate *app = (AppDelegate *)[[UIApplication sharedApplication]delegate];
             app.detailViewController.sortedArray=_sortedArray;
-            [app.detailViewController handleFile:selectedFile fromController:fileListManagerController];
+            [app.detailViewController handleFile:selectedFile fromController:fileListManagerController andIsForceDownload:NO];
             
             CustomCellFileAndDirectory *sharedLink = (CustomCellFileAndDirectory*) [_tableView cellForRowAtIndexPath:indexPath];
             [sharedLink setSelectedStrong:YES];
@@ -1413,7 +1401,7 @@
             //Font for file
             UIFont *fileFont = [UIFont fontWithName:@"HelveticaNeue-Light" size:17];
             fileCell.labelTitle.font = fileFont;
-            fileCell.labelTitle.text = [file.fileName stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+            fileCell.labelTitle.text = [file.fileName stringByRemovingPercentEncoding];
             
             NSString *fileSizeString = @"";
             //Obtain the file size from the data base
@@ -1449,7 +1437,7 @@
             UIFont *fileFont = [UIFont fontWithName:@"HelveticaNeue" size:17];
             fileCell.labelTitle.font = fileFont;
             
-            NSString *folderName = [file.fileName stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+            NSString *folderName = [file.fileName stringByRemovingPercentEncoding];
             //Quit the last character
             folderName = [folderName substringToIndex:[folderName length]-1];
             
@@ -1571,9 +1559,12 @@
     @try {
         CustomCellFileAndDirectory *customCell = (CustomCellFileAndDirectory *) cell;
         
-        if ([customCell isKindOfClass:[CustomCellFileAndDirectory class]] && customCell.thumbnailSessionTask) {
-            DLog(@"Cancel thumbnailOperation");
-            [customCell.thumbnailSessionTask cancel];
+        if (!IS_IOS9) {
+            if ([customCell isKindOfClass:[CustomCellFileAndDirectory class]] && customCell.thumbnailSessionTask) {
+           
+                DLog(@"Cancel thumbnailOperation");
+                [customCell.thumbnailSessionTask cancel];
+            }
         }
     }
     @catch (NSException *exception) {
@@ -1632,8 +1623,10 @@
     }
     footerLabel.text = footerText;
     
-    [footerView addSubview:footerLabel];
-    [_tableView setTableFooterView:footerView];
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [footerView addSubview:footerLabel];
+        [_tableView setTableFooterView:footerView];
+    });
 }
 
 
@@ -1681,7 +1674,7 @@
  * if is file open preview 
  * @selectedFile -> FileDto object selected by the user
  */
-- (void) goToSelectedFileOrFolder:(FileDto *) selectedFile {
+- (void) goToSelectedFileOrFolder:(FileDto *) selectedFile andForceDownload:(BOOL) isForceDownload {
     
     [self initLoading];
     
@@ -1694,16 +1687,16 @@
         if(self.fileIdToShowFiles.isRootFolder){
             UIBarButtonItem *backButton = [[UIBarButtonItem alloc]
                                            initWithImage:[UIImage imageNamed:[FileNameUtils getTheNameOfTheBrandImage]]
-                                           style:UIBarButtonItemStyleBordered
+                                           style:UIBarButtonItemStylePlain
                                            target:nil
                                            action:nil];
             self.navigationItem.backBarButtonItem = backButton;
         }else{
-            NSString *folderName = [[selectedFile.filePath stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding] lastPathComponent];
+            NSString *folderName = [[selectedFile.filePath stringByRemovingPercentEncoding] lastPathComponent];
             self.navigationItem.backBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(folderName, nil) style:UIBarButtonItemStylePlain target:nil action:nil];
         }
         
-        FilePreviewViewController *viewController = [[FilePreviewViewController alloc]initWithNibName:@"FilePreviewViewController" selectedFile:selectedFile];
+        FilePreviewViewController *viewController = [[FilePreviewViewController alloc]initWithNibName:@"FilePreviewViewController" selectedFile:selectedFile andIsForceDownload:isForceDownload];
         
         //Hide tabbar
         viewController.hidesBottomBarWhenPushed = YES;
@@ -1797,7 +1790,7 @@
     
     NSString *path = _nextRemoteFolder;
     
-   path = [path stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+   path = [path stringByRemovingPercentEncoding];
     
     if (!app.userSessionCurrentToken) {
         app.userSessionCurrentToken = [UtilsFramework getUserSessionToken];
@@ -1884,9 +1877,11 @@
     
     //Update the table footer
     [self setTheLabelOnTheTableFooter];
-        
-    //Reload data in the table
-    [self reloadTableFileList];
+    
+    dispatch_async(dispatch_get_main_queue(), ^{
+        //Reload data in the table
+        [self reloadTableFileList];
+    });
     
     //TODO: Remove this to prevent duplicate files
     /*if([_currentDirectoryArray count] != 0) {
@@ -1898,7 +1893,9 @@
 -(void)reloadTableFileListAfterCapabilitiesUpdated {
     _currentDirectoryArray = [ManageFilesDB getFilesByFileIdForActiveUser:_fileIdToShowFiles.idFile];
     _sortedArray = [SortManager getSortedArrayFromCurrentDirectoryArray:_currentDirectoryArray forUser:APP_DELEGATE.activeUser];
-    [self reloadTableFileList];
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [self reloadTableFileList];
+    });
 }
 -(void)reloadTableFileList{
     [self.tableView performSelectorOnMainThread:@selector(reloadData) withObject:nil waitUntilDone:YES];
@@ -1922,8 +1919,10 @@
     //update gallery array
     [self updateArrayImagesInGallery];
     
-    //Reload data in the table
-    [_tableView reloadData];
+    dispatch_async(dispatch_get_main_queue(), ^{
+        //Reload data in the table
+        [_tableView reloadData];
+    });
 }
 
 
@@ -1941,9 +1940,11 @@
     if (!IS_IPHONE) {
         AppDelegate *app = (AppDelegate *)[[UIApplication sharedApplication]delegate];
         
-        if (app.detailViewController.galleryView) {
-            [app.detailViewController.galleryView updateImagesArrayWithNewArray:_sortedArray];
-        }
+        dispatch_async(dispatch_get_main_queue(), ^{
+            if (app.detailViewController.galleryView) {
+                [app.detailViewController.galleryView updateImagesArrayWithNewArray:_sortedArray];
+            }
+        });
     }
 }
 
@@ -1975,7 +1976,9 @@
  */
 - (void)stopPullRefresh{
     //_refreshControl.attributedTitle = [[NSAttributedString alloc] initWithString: NSLocalizedString(@"pull_down_refresh", nil)];
-    [_refreshControl endRefreshing];
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [_refreshControl endRefreshing];
+    });
 }
 
 /*
@@ -2029,7 +2032,7 @@
     
     NSString *path = _currentRemoteFolder;
     
-    path = [path stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+    path = [path stringByRemovingPercentEncoding];
     
     if (!app.userSessionCurrentToken) {
         app.userSessionCurrentToken = [UtilsFramework getUserSessionToken];
@@ -2091,6 +2094,18 @@
 
 - (void) reloadCellByFile:(FileDto *) file {
    
+    NSArray* indexArray = [NSArray arrayWithObjects:[self getIndexPathFromFilesTableViewByFile:file], nil];
+    
+    dispatch_queue_t mainThreadQueue = dispatch_get_main_queue();
+    dispatch_async(mainThreadQueue, ^{
+        [self.tableView beginUpdates];
+        [self.tableView reloadRowsAtIndexPaths:indexArray withRowAnimation:UITableViewRowAnimationNone];
+        [self.tableView endUpdates];
+    });
+}
+
+- (NSIndexPath*) getIndexPathFromFilesTableViewByFile:(FileDto *) file {
+    
     NSIndexPath* indexPath;
     BOOL isFound = NO;
     
@@ -2115,14 +2130,7 @@
         }
     }
     
-    NSArray* indexArray = [NSArray arrayWithObjects:indexPath, nil];
-    
-    dispatch_queue_t mainThreadQueue = dispatch_get_main_queue();
-    dispatch_async(mainThreadQueue, ^{
-        [self.tableView beginUpdates];
-        [self.tableView reloadRowsAtIndexPaths:indexArray withRowAnimation:UITableViewRowAnimationNone];
-        [self.tableView endUpdates];
-    });
+    return indexPath;
 }
 
 /*
@@ -2239,7 +2247,7 @@
         
         NSString *path = [UtilsUrls getFilePathOnDBByFilePathOnFileDto:_fileIdToShowFiles.filePath andUser:app.activeUser];
         path = [path stringByAppendingString:_fileIdToShowFiles.fileName];
-        path = [path stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+        path = [path stringByRemovingPercentEncoding];
         
         //Checking the Shared files and folders
         [[AppDelegate sharedOCCommunication] readSharedByServer:app.activeUser.url andPath:path onCommunication:[AppDelegate sharedOCCommunication] successRequest:^(NSHTTPURLResponse *response, NSArray *items, NSString *redirectedServer) {
@@ -2301,7 +2309,7 @@
 
     } else if (app.activeUser.hasShareApiSupport == serverFunctionalityNotChecked) {
         //If the server has not been checked, do it
-        [app checkIfServerSupportThings];
+        [CheckFeaturesSupported updateServerFeaturesAndCapabilitiesOfActiveUser];
     }
 }
 
@@ -2433,6 +2441,18 @@
                         [self didSelectFavoriteOption];
                     }
                     break;
+                case 4:
+                    if ([[AppDelegate sharedManageFavorites] isInsideAFavoriteFolderThisFile:self.selectedFileDto] || self.selectedFileDto.isFavorite  ||
+                        self.selectedFileDto.isDownload == downloaded) {
+                        DLog(@"Cancel");
+                    } else {
+                        if (self.selectedFileDto.isDownload == downloading ||
+                            self.selectedFileDto.isDownload == updating) {
+                            [self didSelectCancelDownloadFileOption];
+                        } else {
+                            [self didSelectDownloadFileOption];
+                        }
+                    }
                 default:
                     break;
             }
@@ -2776,12 +2796,12 @@
             self.selectFolderNavigation.modalTransitionStyle=UIModalTransitionStyleCoverVertical;
             self.selectFolderNavigation.modalPresentationStyle = UIModalPresentationFormSheet;
             
-            if (IS_IOS8 || IS_IOS9) {
-                //Remove all the views in the main screen for the iOS8 bug
-                if (self.moreActionSheet) {
-                    [self.moreActionSheet dismissWithClickedButtonIndex:0 animated:YES];
-                }
+            
+            //Remove all the views in the main screen for the iOS8 bug
+            if (self.moreActionSheet) {
+                [self.moreActionSheet dismissWithClickedButtonIndex:0 animated:YES];
             }
+
             [app.detailViewController presentViewController:self.selectFolderNavigation animated:YES completion:nil];
         }
         //Hide preview (only in iPad)
@@ -2814,7 +2834,7 @@
     
     NSString *path = _nextRemoteFolder;
     
-    path = [path stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+    path = [path stringByRemovingPercentEncoding];
     
     if (!app.userSessionCurrentToken) {
         app.userSessionCurrentToken = [UtilsFramework getUserSessionToken];
@@ -2915,6 +2935,52 @@
         if (app.detailViewController.file) {
             [app.detailViewController updateFavoriteIconWhenAFolderIsSelectedFavorite];
         }
+    }
+}
+
+- (void) didSelectDownloadFileOption {
+    
+    self.selectedFileDto = [ManageFilesDB getFileDtoByFileName:self.selectedFileDto.fileName andFilePath:[UtilsUrls getFilePathOnDBByFilePathOnFileDto:self.selectedFileDto.filePath andUser:APP_DELEGATE.activeUser] andUser:APP_DELEGATE.activeUser];
+    
+    if (IS_IPHONE){
+        [self goToSelectedFileOrFolder:self.selectedFileDto andForceDownload:YES];
+    } else {
+        
+        //Select in detail view
+        if (_selectedCell) {
+            CustomCellFileAndDirectory *temp = (CustomCellFileAndDirectory*) [_tableView cellForRowAtIndexPath:_selectedCell];
+            [temp setSelectedStrong:NO];
+        }
+        
+        //Select in detail
+        AppDelegate *app = (AppDelegate *)[[UIApplication sharedApplication]delegate];
+        
+        //Quit the player if exist
+        if (app.detailViewController.avMoviePlayer) {
+            [app.detailViewController removeMediaPlayer];
+        }
+        app.detailViewController.sortedArray=_sortedArray;
+        [app.detailViewController handleFile:self.selectedFileDto fromController:fileListManagerController andIsForceDownload:YES];
+    }
+    
+    //Select the cell
+    NSIndexPath *indexPath = [self getIndexPathFromFilesTableViewByFile:self.selectedFileDto];
+    UITableViewCell *cell = [self.tableView cellForRowAtIndexPath:indexPath];
+    [cell setSelected:YES];
+
+}
+
+- (void) didSelectCancelDownloadFileOption {
+    DLog(@"Cancel download");
+    
+    if (IS_IPHONE) {
+        for (Download *currentDownload in [APP_DELEGATE.downloadManager getDownloads]) {
+            if (currentDownload.fileDto.idFile == self.selectedFileDto.idFile) {
+                [currentDownload cancelDownload];
+            }
+        }
+    } else {
+        [APP_DELEGATE.detailViewController didPressCancelButton:nil];
     }
 }
 
@@ -3190,10 +3256,13 @@
     if (_openWith) {
         DLog(@"CANCEL DOWNLOAD");
         [_openWith cancelDownload];
-        [_downloadView.view removeFromSuperview];
-        //Ublock view    
-        self.navigationController.navigationBar.userInteractionEnabled=YES;
-        self.tabBarController.tabBar.userInteractionEnabled=YES; 
+        
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [_downloadView.view removeFromSuperview];
+            //Ublock view
+            self.navigationController.navigationBar.userInteractionEnabled=YES;
+            self.tabBarController.tabBar.userInteractionEnabled=YES;
+        });
     }
 }
 /*
@@ -3259,8 +3328,6 @@
  * @req --> NSData of the server request
  */
 -(void)checkEtagBeforeMakeRefreshFolderRequest:(NSArray *) requestArray {
-    
-    _checkingEtag = NO;
     
    //if(req.responseStatusCode < 401) {
     
@@ -3333,14 +3400,10 @@
  */
 - (void)showError:(NSString *) message {
     
-    if (!_checkingEtag) {
-        
-        [self performSelectorOnMainThread:@selector(showAlertView:)
+    [self performSelectorOnMainThread:@selector(showAlertView:)
                                withObject:message
                             waitUntilDone:YES];
-    } else {
-        _checkingEtag = NO;
-    }
+  
      dispatch_async(dispatch_get_main_queue(), ^{
          [_tableView deselectRowAtIndexPath:[_tableView indexPathForSelectedRow] animated:YES];
      });
@@ -3357,32 +3420,10 @@
     
     [self endLoading];
     
-    //Flag to indicate that the error login is in the screen
-    AppDelegate *app = (AppDelegate*)[[UIApplication sharedApplication] delegate];
-    if (app.isErrorLoginShown == NO && !_checkingEtag) {
-        app.isErrorLoginShown = YES;
-        
-        //In SAML the error message is about the session expired
-        if (k_is_sso_active) {
-            //UIAlertView with blocks
-            [UIAlertView showWithTitle:NSLocalizedString(@"session_expired", nil) message:@"" cancelButtonTitle:nil otherButtonTitles:@[NSLocalizedString(@"ok", nil)] tapBlock:^(UIAlertView *alertView, NSInteger buttonIndex) {
-        
-                [self showEditAccount];
-            }];
-        } else {
-            //UIAlertView with blocks
-            [UIAlertView showWithTitle:NSLocalizedString(@"error_login_message", nil) message:@"" cancelButtonTitle:nil otherButtonTitles:@[NSLocalizedString(@"ok", nil)] tapBlock:^(UIAlertView *alertView, NSInteger buttonIndex) {
-                
-                [self showEditAccount];
-            }];
-        }
-    }
+    [self showEditAccount];
     
-    if(!_checkingEtag) {
-        [self stopPullRefresh];
-        [self cancelDownload];
-    }
-    _checkingEtag = NO;
+    [self stopPullRefresh];
+    [self cancelDownload];
 }
 
 - (void) showEditAccount {
@@ -3390,8 +3431,12 @@
     AppDelegate *app = (AppDelegate*)[[UIApplication sharedApplication] delegate];
     
     //Edit Account
-    _resolvedCredentialError = [[EditAccountViewController alloc]initWithNibName:@"EditAccountViewController_iPhone" bundle:nil andUser:app.activeUser];
-    [_resolvedCredentialError setBarForCancelForLoadingFromModal];
+    BOOL requiredUpdateUrl = [UtilsUrls isNecessaryUpdateToPredefinedUrlByPreviousUrl:[ManageUsersDB getActiveUser].predefinedUrl];
+    if (requiredUpdateUrl) {
+        self.resolvedCredentialError = [[EditAccountViewController alloc]initWithNibName:@"EditAccountViewController_iPhone" bundle:nil andUser:app.activeUser andLoginMode:LoginModeMigrate];
+    } else {
+        self.resolvedCredentialError = [[EditAccountViewController alloc]initWithNibName:@"EditAccountViewController_iPhone" bundle:nil andUser:app.activeUser andLoginMode:LoginModeExpire];
+    }
     
     if (IS_IPHONE) {
         OCNavigationController *navController = [[OCNavigationController alloc] initWithRootViewController:_resolvedCredentialError];
@@ -3602,7 +3647,7 @@
         self.moreActionSheet = nil;
     }
     
-    NSString *title = [self.selectedFileDto.fileName stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+    NSString *title = [self.selectedFileDto.fileName stringByRemovingPercentEncoding];
     
     if(self.selectedFileDto.isDirectory) {
         
@@ -3646,15 +3691,29 @@
         }
     } else {
         
-        NSString *favoriteOrUnfavoriteString = @"";
+        NSString *availableOfflineOrNotString = @"";
         
         if (_selectedFileDto.isFavorite && !self.isCurrentFolderSonOfFavoriteFolder) {
-            favoriteOrUnfavoriteString = NSLocalizedString(@"not_available_offline", nil);
+            availableOfflineOrNotString = NSLocalizedString(@"not_available_offline", nil);
         } else {
-            favoriteOrUnfavoriteString = NSLocalizedString(@"available_offline", nil);
+            availableOfflineOrNotString = NSLocalizedString(@"available_offline", nil);
         }
         
-        self.moreActionSheet = [[UIActionSheet alloc]initWithTitle:title delegate:self cancelButtonTitle:NSLocalizedString(@"cancel", nil) destructiveButtonTitle: nil otherButtonTitles:NSLocalizedString(@"open_with_label", nil), NSLocalizedString(@"rename_long_press", nil), NSLocalizedString(@"move_long_press", nil), favoriteOrUnfavoriteString, nil];
+        NSString *downloadFileCancelDownload;
+        
+        if ([[AppDelegate sharedManageFavorites] isInsideAFavoriteFolderThisFile:self.selectedFileDto] || self.selectedFileDto.isFavorite  ||
+            self.selectedFileDto.isDownload == downloaded) {
+            downloadFileCancelDownload = nil;
+        } else {
+            if (self.selectedFileDto.isDownload == downloading ||
+                self.selectedFileDto.isDownload == updating) {
+                downloadFileCancelDownload = NSLocalizedString(@"cancel_download", nil);
+            } else {
+                downloadFileCancelDownload = NSLocalizedString(@"download_file", nil);
+            }
+        }
+        
+        self.moreActionSheet = [[UIActionSheet alloc]initWithTitle:title delegate:self cancelButtonTitle:NSLocalizedString(@"cancel", nil) destructiveButtonTitle: nil otherButtonTitles:NSLocalizedString(@"open_with_label", nil), NSLocalizedString(@"rename_long_press", nil), NSLocalizedString(@"move_long_press", nil), availableOfflineOrNotString, downloadFileCancelDownload, nil];
         self.moreActionSheet.tag=200;
         
         if (IS_IPHONE) {

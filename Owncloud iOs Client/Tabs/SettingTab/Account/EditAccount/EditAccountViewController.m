@@ -25,7 +25,12 @@
 #import "UtilsCookies.h"
 #import "UtilsFramework.h"
 #import "ManageCookiesStorageDB.h"
+#import "CheckFeaturesSupported.h"
 #import "CheckCapabilities.h"
+#import "FilesViewController.h"
+#import "UtilsUrls.h"
+#import "OCKeychain.h"
+#import "InstantUpload.h"
 
 
 //Initialization the notification
@@ -40,77 +45,29 @@ NSString *relaunchErrorCredentialFilesNotification = @"relaunchErrorCredentialFi
 @synthesize selectedUser = _selectedUser;
 
 
-- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil andUser:(UserDto *) selectedUser {
+- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil andUser:(UserDto *) selectedUser andLoginMode:(LoginMode)loginMode {
     
-    self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
+    self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil andLoginMode:loginMode];
     if (self) {
         self.selectedUser = selectedUser;
         
-        self.auxUrlForReloadTable = self.selectedUser.url;
+        if(self.loginMode == LoginModeMigrate){
+            self.auxUrlForReloadTable = k_default_url_server;
+        } else {
+            self.auxUrlForReloadTable = self.selectedUser.url;
+        }
         self.auxUsernameForReloadTable = self.selectedUser.username;
-        self.auxPasswordForReloadTable = self.selectedUser.password;
-        
-        urlEditable = NO;
-        userNameEditable = NO;
         
         DLog(@"self.auxUrlForReloadTable: %@", self.auxUrlForReloadTable);
         
         isSSLAccepted = YES;
-        isErrorOnCredentials = NO;
         isCheckingTheServerRightNow = YES;
         isConnectionToServer = NO;
         isNeedToCheckAgain = YES;
         
-        
-        // Custom initialization
-        if ([[UIDevice currentDevice] userInterfaceIdiom] != UIUserInterfaceIdiomPhone) {
-            UIBarButtonItem *cancelButton = [[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"cancel", nil) style:UIBarButtonItemStylePlain target:self action:@selector(cancelClicked:)];
-            
-            self.navigationItem.leftBarButtonItem = cancelButton;
+        if(k_multiaccount_available && loginMode != LoginModeMigrate && loginMode != LoginModeExpire) {
+            [self setBarForCancelForLoadingFromModal];
         }
-    }
-    return self;
-}
-
-- (void)setTableBackGroundColor {
-    [self.tableView setBackgroundView: nil];
-    [self.tableView setBackgroundColor:[UIColor colorOfLoginBackground]];
-}
-
-- (void)setBarForCancelForLoadingFromModal {
-    
-    UIBarButtonItem *cancelButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemCancel target:self action:@selector(closeViewController)];
-    [self.navigationItem setLeftBarButtonItem:cancelButton];
-}
-
-- (void)setBrandingNavigationBarWithCancelButton{
-    
-    if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPhone) {
-        [self.navigationController.navigationBar setTintColor:[UIColor colorOfNavigationBar]];
-    }else{
-        [self.navigationController.navigationBar setTintColor:[UIColor colorOfNavigationBar]];
-    }
-    //If the client want his custom bar
-    if(k_have_image_background_navigation_bar) {
-        UIImage *imageBack = [UIImage imageNamed:@"topBar.png"];
-        [self.navigationController.navigationBar setBackgroundImage:imageBack forBarMetrics:UIBarMetricsDefault];
-    }
-    
-    [self setBarForCancelForLoadingFromModal];
-}
-
-- (void) closeViewController {
-    
-    
-    [self dismissViewControllerAnimated:YES completion:nil];
-    //[self dismissModalViewControllerAnimated:NO];
-}
-
-- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
-{
-    self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
-    if (self) {
-        // Custom initialization
     }
     return self;
 }
@@ -151,9 +108,6 @@ NSString *relaunchErrorCredentialFilesNotification = @"relaunchErrorCredentialFi
 
 - (void) viewDidDisappear:(BOOL)animated {
     [super viewDidDisappear:animated];
-    
-    AppDelegate *appDelegate = (AppDelegate*)[[UIApplication sharedApplication] delegate];
-    appDelegate.isErrorLoginShown=NO;
 }
 
 - (void) viewWillAppear:(BOOL)animated {
@@ -168,11 +122,6 @@ NSString *relaunchErrorCredentialFilesNotification = @"relaunchErrorCredentialFi
     
     [super viewWillAppear:animated];
     
-}
-
-
--(void)internazionaliceTheInitialInterface {
-    self.loginButtonString = NSLocalizedString(@"save_changes", nil);
 }
 
 -(void)potraitViewiPad{
@@ -239,7 +188,7 @@ NSString *relaunchErrorCredentialFilesNotification = @"relaunchErrorCredentialFi
     [UtilsCookies eraseURLCache];
     
     //We check if the user that we are editing is the same that we are using
-    if ([_selectedUser.username isEqualToString:samlUserName]) {
+    if ([_selectedUser.username isEqualToString:samlUserName] || self.loginMode == LoginModeMigrate) {
         
         _usernameTextField = [UITextField new];
         _usernameTextField.text = samlUserName;
@@ -248,9 +197,7 @@ NSString *relaunchErrorCredentialFilesNotification = @"relaunchErrorCredentialFi
         _passwordTextField.text = cookieString;
         [self goTryToDoLogin];
     } else {
-        
-        UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:NSLocalizedString(@"credentials_different_user", nil) message:@"" delegate:self cancelButtonTitle:NSLocalizedString(@"ok", nil) otherButtonTitles:nil, nil];
-        [alertView show];
+        [self showError:NSLocalizedString(@"credentials_different_user", nil)];
     }
 }
 
@@ -271,71 +218,90 @@ NSString *relaunchErrorCredentialFilesNotification = @"relaunchErrorCredentialFi
     //DLog(@"Request Did Fetch Directory Listing And Test Authetification");
     
     if(requestCode >= 400) {
-        isError500 = YES;
-        [self hideTryingToLogin];
-        
-        [self.tableView reloadData];
+        [self.manageNetworkErrors returnErrorMessageWithHttpStatusCode:requestCode
+                                                              andError:nil];
     } else {
         
-        UserDto *userDto = [[UserDto alloc] init];
+        UserDto *userDtoEdited =[ManageUsersDB getUserByIdUser:self.selectedUser.idUser];
         
         //We check if start with http or https to concat it
         if([self.urlTextField.text hasPrefix:@"http://"] || [self.urlTextField.text hasPrefix:@"https://"]) {
-            userDto.url = [self getUrlChecked: self.urlTextField.text];
+            userDtoEdited.url = [self getUrlChecked: self.urlTextField.text];
             
         } else {
             if(isHttps) {
-                userDto.url = [NSString stringWithFormat:@"%@%@",@"https://", [self getUrlChecked: self.urlTextField.text]];
+                userDtoEdited.url = [NSString stringWithFormat:@"%@%@",@"https://", [self getUrlChecked: self.urlTextField.text]];
             } else {
-                userDto.url = [NSString stringWithFormat:@"%@%@",@"http://", [self getUrlChecked: self.urlTextField.text]];
+                userDtoEdited.url = [NSString stringWithFormat:@"%@%@",@"http://", [self getUrlChecked: self.urlTextField.text]];
             }
         }
-        
-        self.selectedUser.password = self.passwordTextField.text;
-        
+
         [self hideTryingToLogin];
         
-        [ManageUsersDB updatePassword:self.selectedUser];
+        //TODO normalize username and password fields
+        NSString *userNameUTF8=self.usernameTextField.text;
+        NSString *passwordUTF8=self.passwordTextField.text;
         
-        //Update capabilities of the active account
-        if (self.selectedUser.activeaccount) {
-            [[CheckCapabilities sharedCheckCapabilities] updateServerCapabilitiesOfActiveAccount];
+        userDtoEdited.username = userNameUTF8;
+        userDtoEdited.password = passwordUTF8;
+        
+        //Update parameters after a force url and credentials have not been renewed
+        if (self.loginMode == LoginModeMigrate) {
+            
+            if (k_is_sso_active) {
+                userDtoEdited.username = self.usernameTextField.text;
+            }
+            userDtoEdited.ssl = isHttps;
+            userDtoEdited.urlRedirected = APP_DELEGATE.urlServerRedirected;
+            userDtoEdited.predefinedUrl = k_default_url_server;
+            
+            [ManageUploadsDB overrideAllUploadsWithNewURL:[UtilsUrls getFullRemoteServerPath:userDtoEdited]];
+            
+            [ManageUsersDB updateUserByUserDto:userDtoEdited];
         }
         
-        //Change the state of the of the user uploads with credential error
-        [ManageUploadsDB updateErrorCredentialFiles:_selectedUser.idUser];
+        //update keychain user
+        if(![OCKeychain updateCredentialsById:[NSString stringWithFormat:@"%ld", (long)userDtoEdited.idUser] withUsername:userDtoEdited.username andPassword:userDtoEdited.password]) {
+            DLog(@"Error updating credentials of userId:%ld on keychain",(long)userDtoEdited.idUser);
+        }
         
-        //Cancel current uploads with the same user
-        AppDelegate *appDelegate = (AppDelegate*)[[UIApplication sharedApplication] delegate];
-        [appDelegate cancelTheCurrentUploadsOfTheUser:_selectedUser.idUser];
-        [appDelegate.downloadManager cancelDownloadsAndRefreshInterface];
-        [appDelegate launchProcessToSyncAllFavorites];
+        if (userDtoEdited.activeaccount) {
+        
+            //update current active DTO user
+            APP_DELEGATE.activeUser = userDtoEdited;
+            DLog(@"user predefined url:%@", APP_DELEGATE.activeUser.predefinedUrl);
             
-         [[NSNotificationCenter defaultCenter] postNotificationName:relaunchErrorCredentialFilesNotification object:_selectedUser];
+            [UtilsCookies eraseCredentialsAndUrlCacheOfActiveUser];
+            
+            [CheckFeaturesSupported updateServerFeaturesAndCapabilitiesOfActiveUser];
+        }
+        
+        //Change the state of user uploads with credential error
+        [ManageUploadsDB updateErrorCredentialFiles:userDtoEdited.idUser];
+        
+        [self performSelector:@selector(restoreDownloadsAndUploads) withObject:nil afterDelay:5.0];
+        
+        if (self.loginMode == LoginModeMigrate) {
+            [APP_DELEGATE updateStateAndRestoreUploadsAndDownloads];
+            [[APP_DELEGATE presentFilesViewController] initFilesView];
+            [[InstantUpload instantUploadManager] activate];
+        }
+        
+        [[NSNotificationCenter defaultCenter] postNotificationName:relaunchErrorCredentialFilesNotification object:_selectedUser];
         
         [[self navigationController] popViewControllerAnimated:YES];
        
-        
         [self performSelector:@selector(closeViewController) withObject:nil afterDelay:0.5];
-        
     }
 }
 
-/*- (void)sendErrorCredentialFilesNotification{
-    
-    //Notification to indicate that shouled be relaunch the uploads with Credentials Error
-    [[NSNotificationCenter defaultCenter] postNotificationName:relaunchErrorCredentialFilesNotification object:_selectedUser];
-}*/
-
-
-
-#pragma mark - Buttons
-/*
- * This method close the view
- */
-- (IBAction)cancelClicked:(id)sender {
-    [self dismissViewControllerAnimated:YES completion:nil];
+- (void) restoreDownloadsAndUploads {
+    //Cancel current uploads with the same user
+    [APP_DELEGATE cancelTheCurrentUploadsOfTheUser:_selectedUser.idUser];
+    [APP_DELEGATE.downloadManager cancelDownloadsAndRefreshInterface];
+    [APP_DELEGATE launchProcessToSyncAllFavorites];
 }
+
 
 
 @end

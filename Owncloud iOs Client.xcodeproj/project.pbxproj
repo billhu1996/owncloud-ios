@@ -353,9 +353,8 @@
 		405D06C51BFB670100591604 /* ManageCapabilitiesDB.m in Sources */ = {isa = PBXBuildFile; fileRef = EA0EFA1E1BEA6C6E009971AF /* ManageCapabilitiesDB.m */; };
 		405D06C71BFB670200591604 /* ManageCapabilitiesDB.m in Sources */ = {isa = PBXBuildFile; fileRef = EA0EFA1E1BEA6C6E009971AF /* ManageCapabilitiesDB.m */; };
 		405D06C81BFB670800591604 /* ManageCapabilitiesDB.m in Sources */ = {isa = PBXBuildFile; fileRef = EA0EFA1E1BEA6C6E009971AF /* ManageCapabilitiesDB.m */; };
-		405D06C91BFB678800591604 /* CapabilitiesDto.m in Sources */ = {isa = PBXBuildFile; fileRef = EA0EFA1A1BEA66A1009971AF /* CapabilitiesDto.m */; };
-		405D06CA1BFB678800591604 /* CapabilitiesDto.m in Sources */ = {isa = PBXBuildFile; fileRef = EA0EFA1A1BEA66A1009971AF /* CapabilitiesDto.m */; };
-		405D06CB1BFB678900591604 /* CapabilitiesDto.m in Sources */ = {isa = PBXBuildFile; fileRef = EA0EFA1A1BEA66A1009971AF /* CapabilitiesDto.m */; };
+		4096E2491EB8650200318240 /* ShareWarningLinkCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4096E2471EB8650200318240 /* ShareWarningLinkCell.swift */; };
+		4096E24A1EB8650200318240 /* ShareWarningLinkCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 4096E2481EB8650200318240 /* ShareWarningLinkCell.xib */; };
 		40A1F17E1D8857740078C901 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 40A1F1801D8857740078C901 /* InfoPlist.strings */; };
 		40A3A0EB1CEC9B3A0056016A /* more-filledBlack.png in Resources */ = {isa = PBXBuildFile; fileRef = 40A3A0E91CEC9B3A0056016A /* more-filledBlack.png */; };
 		40A3A0EC1CEC9B3A0056016A /* more-filledBlack@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 40A3A0EA1CEC9B3A0056016A /* more-filledBlack@2x.png */; };
@@ -367,6 +366,10 @@
 		40AB1F671A123D03003E7397 /* TABrecents@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = 40AB1F661A123D03003E7397 /* TABrecents@3x.png */; };
 		40AB1F691A123D0E003E7397 /* TABsettings@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = 40AB1F681A123D0E003E7397 /* TABsettings@3x.png */; };
 		40AB1F6B1A123D1B003E7397 /* TABShares@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = 40AB1F6A1A123D1B003E7397 /* TABShares@3x.png */; };
+		40AB650C1EAF4DCE00379361 /* ShareMainLinkCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40AB650A1EAF4DCE00379361 /* ShareMainLinkCell.swift */; };
+		40AB650D1EAF4DCE00379361 /* ShareMainLinkCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 40AB650B1EAF4DCE00379361 /* ShareMainLinkCell.xib */; };
+		40AB65111EAFA10000379361 /* ShareLinkViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 40AB650F1EAFA10000379361 /* ShareLinkViewController.m */; };
+		40AB65121EAFA10000379361 /* ShareLinkViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 40AB65101EAFA10000379361 /* ShareLinkViewController.xib */; };
 		40AC24D219FE725600582867 /* CredentialsDto.m in Sources */ = {isa = PBXBuildFile; fileRef = 40AC24D119FE725600582867 /* CredentialsDto.m */; };
 		40C0BDB91C46562A0057B1DD /* SharePrivilegeCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 40C0BDB81C46562A0057B1DD /* SharePrivilegeCell.xib */; };
 		40C0BDBC1C465F390057B1DD /* SharePrivilegeCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C0BDBB1C465F390057B1DD /* SharePrivilegeCell.swift */; };
@@ -664,14 +667,16 @@
 		908A3C701D019EDD00A34FDB /* file_synchronizing_icon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 9064143E1D005B5C000AEFE5 /* file_synchronizing_icon@2x.png */; };
 		90D608FA1C89844E0049CCE4 /* SortManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 905B3D3A1C8867AA00BCC93B /* SortManager.m */; };
 		90D608FC1C8984760049CCE4 /* SortManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 905B3D3A1C8867AA00BCC93B /* SortManager.m */; };
+		BC7765951EDD7C1500E32D89 /* PresentedViewUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = BC7765941EDD7C1500E32D89 /* PresentedViewUtils.m */; };
 		BC855ACD1E0D4B0200998CB7 /* FLAnimatedImage.m in Sources */ = {isa = PBXBuildFile; fileRef = BC855ACA1E0D4B0200998CB7 /* FLAnimatedImage.m */; };
 		BC855ACE1E0D4B0200998CB7 /* FLAnimatedImageView.m in Sources */ = {isa = PBXBuildFile; fileRef = BC855ACC1E0D4B0200998CB7 /* FLAnimatedImageView.m */; };
+		CB238ACB1E52FC2A006A03FA /* MediaAVPlayerViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = CB238ACA1E52FC2A006A03FA /* MediaAVPlayerViewController.m */; };
+		CB238ACD1E52FCA4006A03FA /* AVKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CB238ACC1E52FCA4006A03FA /* AVKit.framework */; };
 		CB6ABBC21E4CA0C000F27940 /* OCURLSessionManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 59A6B65619458F6E000B107D /* OCURLSessionManager.m */; };
 		EA0599851BB92B19002C2864 /* ShareUserCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA0599831BB92B19002C2864 /* ShareUserCell.swift */; };
 		EA0599861BB92B19002C2864 /* ShareUserCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = EA0599841BB92B19002C2864 /* ShareUserCell.xib */; };
 		EA0599931BB94F3F002C2864 /* ShareSearchUserViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = EA0599911BB94F3F002C2864 /* ShareSearchUserViewController.m */; };
 		EA0599941BB94F3F002C2864 /* ShareSearchUserViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = EA0599921BB94F3F002C2864 /* ShareSearchUserViewController.xib */; };
-		EA0EFA1B1BEA66A1009971AF /* CapabilitiesDto.m in Sources */ = {isa = PBXBuildFile; fileRef = EA0EFA1A1BEA66A1009971AF /* CapabilitiesDto.m */; };
 		EA0EFA1F1BEA6C6E009971AF /* ManageCapabilitiesDB.m in Sources */ = {isa = PBXBuildFile; fileRef = EA0EFA1E1BEA6C6E009971AF /* ManageCapabilitiesDB.m */; };
 		EA123C781C58E9C500926398 /* MainAppIcon_167-167.png in Resources */ = {isa = PBXBuildFile; fileRef = EA123C771C58E9C500926398 /* MainAppIcon_167-167.png */; };
 		EA1415A61AB1B89E0083EACE /* OCToolBar.m in Sources */ = {isa = PBXBuildFile; fileRef = EA42FA4D1804217D0006DB7C /* OCToolBar.m */; };
@@ -1525,6 +1530,8 @@
 		405655191CE0A204001266EE /* UtilsFileSystem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = UtilsFileSystem.h; path = Utils/UtilsFileSystem.h; sourceTree = "<group>"; };
 		4056551A1CE0A204001266EE /* UtilsFileSystem.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = UtilsFileSystem.m; path = Utils/UtilsFileSystem.m; sourceTree = "<group>"; };
 		405AD0C01B56C26A00271424 /* iphoneShare.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = iphoneShare.png; sourceTree = "<group>"; };
+		4096E2471EB8650200318240 /* ShareWarningLinkCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ShareWarningLinkCell.swift; path = Tabs/FileTab/Share/Cells/ShareWarningLinkCell.swift; sourceTree = "<group>"; };
+		4096E2481EB8650200318240 /* ShareWarningLinkCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = ShareWarningLinkCell.xib; path = Tabs/FileTab/Share/Cells/ShareWarningLinkCell.xib; sourceTree = "<group>"; };
 		40A1F17F1D8857740078C901 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		40A3A0E91CEC9B3A0056016A /* more-filledBlack.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "more-filledBlack.png"; sourceTree = "<group>"; };
 		40A3A0EA1CEC9B3A0056016A /* more-filledBlack@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "more-filledBlack@2x.png"; sourceTree = "<group>"; };
@@ -1536,6 +1543,11 @@
 		40AB1F661A123D03003E7397 /* TABrecents@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "TABrecents@3x.png"; sourceTree = "<group>"; };
 		40AB1F681A123D0E003E7397 /* TABsettings@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "TABsettings@3x.png"; sourceTree = "<group>"; };
 		40AB1F6A1A123D1B003E7397 /* TABShares@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "TABShares@3x.png"; sourceTree = "<group>"; };
+		40AB650A1EAF4DCE00379361 /* ShareMainLinkCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ShareMainLinkCell.swift; path = Tabs/FileTab/Share/Cells/ShareMainLinkCell.swift; sourceTree = "<group>"; };
+		40AB650B1EAF4DCE00379361 /* ShareMainLinkCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = ShareMainLinkCell.xib; path = Tabs/FileTab/Share/Cells/ShareMainLinkCell.xib; sourceTree = "<group>"; };
+		40AB650E1EAFA10000379361 /* ShareLinkViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ShareLinkViewController.h; path = Tabs/FileTab/Share/ShareLinkViewController.h; sourceTree = "<group>"; };
+		40AB650F1EAFA10000379361 /* ShareLinkViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ShareLinkViewController.m; path = Tabs/FileTab/Share/ShareLinkViewController.m; sourceTree = "<group>"; };
+		40AB65101EAFA10000379361 /* ShareLinkViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = ShareLinkViewController.xib; path = Tabs/FileTab/Share/ShareLinkViewController.xib; sourceTree = "<group>"; };
 		40AC24D019FE725600582867 /* CredentialsDto.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CredentialsDto.h; path = DataBase/DTOs/CredentialsDto.h; sourceTree = "<group>"; };
 		40AC24D119FE725600582867 /* CredentialsDto.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = CredentialsDto.m; path = DataBase/DTOs/CredentialsDto.m; sourceTree = "<group>"; };
 		40C0BDB81C46562A0057B1DD /* SharePrivilegeCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = SharePrivilegeCell.xib; path = Tabs/FileTab/Share/Cells/SharePrivilegeCell.xib; sourceTree = "<group>"; };
@@ -1728,10 +1740,15 @@
 		9069EAA61CF5F07200810996 /* OCLoadingSpinner.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = OCLoadingSpinner.m; path = Utils/OCLoadingSpinner.m; sourceTree = "<group>"; };
 		908A3C5A1D016FE500A34FDB /* file_available_offline_icon@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "file_available_offline_icon@2x.png"; sourceTree = "<group>"; };
 		908A3C5C1D01732C00A34FDB /* file_available_offline_icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = file_available_offline_icon.png; sourceTree = "<group>"; };
+		BC7765931EDD7C1500E32D89 /* PresentedViewUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PresentedViewUtils.h; path = Utils/PresentedViewUtils.h; sourceTree = "<group>"; };
+		BC7765941EDD7C1500E32D89 /* PresentedViewUtils.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = PresentedViewUtils.m; path = Utils/PresentedViewUtils.m; sourceTree = "<group>"; };
 		BC855AC91E0D4B0200998CB7 /* FLAnimatedImage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = FLAnimatedImage.h; path = ExternalLibreries/FLAnimatedimage/FLAnimatedImage.h; sourceTree = "<group>"; };
 		BC855ACA1E0D4B0200998CB7 /* FLAnimatedImage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = FLAnimatedImage.m; path = ExternalLibreries/FLAnimatedimage/FLAnimatedImage.m; sourceTree = "<group>"; };
 		BC855ACB1E0D4B0200998CB7 /* FLAnimatedImageView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = FLAnimatedImageView.h; path = ExternalLibreries/FLAnimatedimage/FLAnimatedImageView.h; sourceTree = "<group>"; };
 		BC855ACC1E0D4B0200998CB7 /* FLAnimatedImageView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = FLAnimatedImageView.m; path = ExternalLibreries/FLAnimatedimage/FLAnimatedImageView.m; sourceTree = "<group>"; };
+		CB238AC91E52FC2A006A03FA /* MediaAVPlayerViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MediaAVPlayerViewController.h; path = Files/PreviewSupportedFiles/Media/MediaAVPlayerViewController.h; sourceTree = "<group>"; };
+		CB238ACA1E52FC2A006A03FA /* MediaAVPlayerViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = MediaAVPlayerViewController.m; path = Files/PreviewSupportedFiles/Media/MediaAVPlayerViewController.m; sourceTree = "<group>"; };
+		CB238ACC1E52FCA4006A03FA /* AVKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVKit.framework; path = System/Library/Frameworks/AVKit.framework; sourceTree = SDKROOT; };
 		D924DCBC1B973E88008B4BE7 /* libOCMock.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libOCMock.a; sourceTree = "<group>"; };
 		D924DCBE1B973E98008B4BE7 /* NSNotificationCenter+OCMAdditions.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "NSNotificationCenter+OCMAdditions.h"; sourceTree = "<group>"; };
 		D924DCBF1B973E98008B4BE7 /* OCMArg.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = OCMArg.h; sourceTree = "<group>"; };
@@ -1747,8 +1764,6 @@
 		EA0599901BB94F3F002C2864 /* ShareSearchUserViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ShareSearchUserViewController.h; path = Tabs/FileTab/Share/ShareSearchUserViewController.h; sourceTree = "<group>"; };
 		EA0599911BB94F3F002C2864 /* ShareSearchUserViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ShareSearchUserViewController.m; path = Tabs/FileTab/Share/ShareSearchUserViewController.m; sourceTree = "<group>"; };
 		EA0599921BB94F3F002C2864 /* ShareSearchUserViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = ShareSearchUserViewController.xib; path = Tabs/FileTab/Share/ShareSearchUserViewController.xib; sourceTree = "<group>"; };
-		EA0EFA191BEA66A1009971AF /* CapabilitiesDto.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CapabilitiesDto.h; path = DataBase/DTOs/CapabilitiesDto.h; sourceTree = "<group>"; };
-		EA0EFA1A1BEA66A1009971AF /* CapabilitiesDto.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = CapabilitiesDto.m; path = DataBase/DTOs/CapabilitiesDto.m; sourceTree = "<group>"; };
 		EA0EFA1D1BEA6C6E009971AF /* ManageCapabilitiesDB.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ManageCapabilitiesDB.h; path = DataBase/Queries/ManageCapabilitiesDB.h; sourceTree = "<group>"; };
 		EA0EFA1E1BEA6C6E009971AF /* ManageCapabilitiesDB.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ManageCapabilitiesDB.m; path = DataBase/Queries/ManageCapabilitiesDB.m; sourceTree = "<group>"; };
 		EA123C771C58E9C500926398 /* MainAppIcon_167-167.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "MainAppIcon_167-167.png"; sourceTree = "<group>"; };
@@ -1928,6 +1943,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CB238ACD1E52FCA4006A03FA /* AVKit.framework in Frameworks */,
 				59C71D281A921A5100F66166 /* ImageIO.framework in Frameworks */,
 				404FDA241A36E5E5008AB4E1 /* CoreLocation.framework in Frameworks */,
 				EA8667E918AA299000D3550D /* libownCloudiOS.a in Frameworks */,
@@ -2041,6 +2057,7 @@
 		1324297B15ADBB3700DF823E /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				CB238ACC1E52FCA4006A03FA /* AVKit.framework */,
 				59C71D271A921A5100F66166 /* ImageIO.framework */,
 				404FDA231A36E5E5008AB4E1 /* CoreLocation.framework */,
 				EA68969217F59A090033B3C1 /* AudioToolbox.framework */,
@@ -2226,8 +2243,6 @@
 				EAC598591A56A150003192B2 /* ProvidingFileDto.m */,
 				59EC94E61BBAA0210085190F /* FolderSyncDto.h */,
 				59EC94E71BBAA0210085190F /* FolderSyncDto.m */,
-				EA0EFA191BEA66A1009971AF /* CapabilitiesDto.h */,
-				EA0EFA1A1BEA66A1009971AF /* CapabilitiesDto.m */,
 			);
 			name = DTOs;
 			sourceTree = "<group>";
@@ -2264,6 +2279,8 @@
 				1339D938178DA3FC00002156 /* UtilsNetworkRequest.m */,
 				59D774CC1910EE0F004322BA /* UtilsTableView.h */,
 				59D774CD1910EE0F004322BA /* UtilsTableView.m */,
+				BC7765931EDD7C1500E32D89 /* PresentedViewUtils.h */,
+				BC7765941EDD7C1500E32D89 /* PresentedViewUtils.m */,
 				593F7CA819EFDE96004136F7 /* UtilsUrls.h */,
 				593F7CA919EFDE96004136F7 /* UtilsUrls.m */,
 				EAAD688D1C560AF2005F3B28 /* ShareUtils.h */,
@@ -2378,6 +2395,9 @@
 				400787701C44F4D400486A26 /* ShareEditUserViewController.h */,
 				400787711C44F4D400486A26 /* ShareEditUserViewController.m */,
 				4007876C1C44EAEE00486A26 /* ShareEditUserViewController.xib */,
+				40AB650E1EAFA10000379361 /* ShareLinkViewController.h */,
+				40AB650F1EAFA10000379361 /* ShareLinkViewController.m */,
+				40AB65101EAFA10000379361 /* ShareLinkViewController.xib */,
 			);
 			name = Share;
 			sourceTree = "<group>";
@@ -3481,12 +3501,16 @@
 		EA5C6F811B70BEAC0088071B /* Cells */ = {
 			isa = PBXGroup;
 			children = (
+				4096E2471EB8650200318240 /* ShareWarningLinkCell.swift */,
+				4096E2481EB8650200318240 /* ShareWarningLinkCell.xib */,
 				EA5C6F821B70BEE20088071B /* ShareFileCell.swift */,
 				EA5C6F831B70BEE30088071B /* ShareFileCell.xib */,
-				EA5C6F861B70BF370088071B /* ShareLinkOptionCell.swift */,
-				EA5C6F871B70BF370088071B /* ShareLinkOptionCell.xib */,
 				EA2243E81B71276D00F62E2A /* ShareLinkHeaderCell.swift */,
 				EA2243E91B71276D00F62E2A /* ShareLinkHeaderCell.xib */,
+				40AB650A1EAF4DCE00379361 /* ShareMainLinkCell.swift */,
+				40AB650B1EAF4DCE00379361 /* ShareMainLinkCell.xib */,
+				EA5C6F861B70BF370088071B /* ShareLinkOptionCell.swift */,
+				EA5C6F871B70BF370088071B /* ShareLinkOptionCell.xib */,
 				EAF7712A1B7340C400ED6E6E /* ShareLinkButtonCell.swift */,
 				EAF7712B1B7340C400ED6E6E /* ShareLinkButtonCell.xib */,
 				EA0599831BB92B19002C2864 /* ShareUserCell.swift */,
@@ -3743,6 +3767,8 @@
 			children = (
 				148DD62F17785DE900FB9977 /* MediaViewController.h */,
 				148DD63017785DE900FB9977 /* MediaViewController.m */,
+				CB238AC91E52FC2A006A03FA /* MediaAVPlayerViewController.h */,
+				CB238ACA1E52FC2A006A03FA /* MediaAVPlayerViewController.m */,
 			);
 			name = Media;
 			sourceTree = "<group>";
@@ -4215,10 +4241,12 @@
 				EABD88F51BBE82C400DA5281 /* NotificationBackgroundMessage@2x.png in Resources */,
 				40A1F17E1D8857740078C901 /* InfoPlist.strings in Resources */,
 				14A6115A19346D0000AECA34 /* sharedItemSwipe@2x.png in Resources */,
+				4096E24A1EB8650200318240 /* ShareWarningLinkCell.xib in Resources */,
 				1487F22D177C35AA004A1A5A /* movie_icon@2x.png in Resources */,
 				40E354D51A14FCE7000E7FE4 /* movie_icon@3x.png in Resources */,
 				1487F22E177C35AA004A1A5A /* movie_icon@2x~ipad.png in Resources */,
 				906414401D005B5C000AEFE5 /* file_new_server_version_available_icon@2x.png in Resources */,
+				40AB65121EAFA10000379361 /* ShareLinkViewController.xib in Resources */,
 				405AD0C11B56C26A00271424 /* iphoneShare.png in Resources */,
 				1487F22F177C35AA004A1A5A /* movie_icon~ipad.png in Resources */,
 				1487F230177C35AA004A1A5A /* pdf_icon.png in Resources */,
@@ -4247,6 +4275,7 @@
 				59D717E11959755600075E02 /* folder-shared@2x.png in Resources */,
 				14A32BBF18DC46CE0084CDCC /* FileOverwritingIcon@2x.png in Resources */,
 				1487F23F177C35AA004A1A5A /* TABsettings@2x.png in Resources */,
+				40AB650D1EAF4DCE00379361 /* ShareMainLinkCell.xib in Resources */,
 				4052B4E21B4ECF35000788DA /* btnHelpPage3.png in Resources */,
 				1487F240177C35AA004A1A5A /* zip_icon.png in Resources */,
 				59EDC4301C611F9A0050939C /* btnHelpPage3@2x.png in Resources */,
@@ -4775,14 +4804,16 @@
 				EA68969917F9AC860033B3C1 /* OCPortraitNavigationViewController.m in Sources */,
 				148DD686177862B600FB9977 /* PrepareFilesToUpload.m in Sources */,
 				148DD68C1778660200FB9977 /* DeleteFile.m in Sources */,
-				EA0EFA1B1BEA66A1009971AF /* CapabilitiesDto.m in Sources */,
 				EAF721801AAF3325009F5596 /* Managers.swift in Sources */,
 				59C71D191A9216AE00F66166 /* ReaderMainPagebar.m in Sources */,
 				595333FB1A1DF26000C57ED5 /* UIAlertView+Blocks.m in Sources */,
+				40AB650C1EAF4DCE00379361 /* ShareMainLinkCell.swift in Sources */,
+				CB238ACB1E52FC2A006A03FA /* MediaAVPlayerViewController.m in Sources */,
 				148DD68F1778661A00FB9977 /* MoveFile.m in Sources */,
 				EAABAB2A18585CD700909831 /* NSString+Encoding.m in Sources */,
 				EABD89321BBE82D900DA5281 /* TSBlurView.m in Sources */,
 				EABF69161891379C00A2217C /* SWLongPressGestureRecognizer.m in Sources */,
+				4096E2491EB8650200318240 /* ShareWarningLinkCell.swift in Sources */,
 				14AB382E18C8E35200B34697 /* InfoFileUtils.m in Sources */,
 				40CF2C6F1C491D200047969A /* ShareUserPrivilegeCell.swift in Sources */,
 				40EDF89F1B4D123500700E3A /* HelpGuideViewController.m in Sources */,
@@ -4824,6 +4855,7 @@
 				EA707223199CC59E00CE7079 /* ManageDownloads.m in Sources */,
 				148DD6B71778693000FB9977 /* RecentViewController.m in Sources */,
 				400A636F1B4FD75600890579 /* IFTTTFilmstrip.m in Sources */,
+				40AB65111EAFA10000379361 /* ShareLinkViewController.m in Sources */,
 				148DD6BD1778695E00FB9977 /* AddAccountViewController.m in Sources */,
 				EAAD688F1C560AF2005F3B28 /* ShareUtils.m in Sources */,
 				14987095187DB14A000D9C49 /* NotificationStatusBarViewController.m in Sources */,
@@ -4892,6 +4924,7 @@
 				1487F15B177C3392004A1A5A /* FMDatabaseQueue.m in Sources */,
 				1487F15C177C3392004A1A5A /* FMResultSet.m in Sources */,
 				14A50E9E18F3FC9100506E2B /* SelectedFolderCell.m in Sources */,
+				BC7765951EDD7C1500E32D89 /* PresentedViewUtils.m in Sources */,
 				400A63761B4FD75600890579 /* IFTTTScrollViewPageConstraintAnimation.m in Sources */,
 				EAD281BC1A38BB2E00A00D54 /* DPDownload.m in Sources */,
 				1428F675178422AE0092F42A /* UploadsOfflineDto.m in Sources */,
@@ -4992,7 +5025,6 @@
 				EAF7217E1AAF2E49009F5596 /* FMDatabaseQueue.m in Sources */,
 				EAC6E5FB1AB0986D00CCF8C4 /* SelectedFolderCell.m in Sources */,
 				EAC6E5FA1AB0985B00CCF8C4 /* SelectFolderNavigation.m in Sources */,
-				405D06C91BFB678800591604 /* CapabilitiesDto.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -5050,7 +5082,6 @@
 				EAD281B61A38986600A00D54 /* NSString+Encoding.m in Sources */,
 				599E57351A08E62700744EC9 /* FileDto.m in Sources */,
 				599D99F81A026004008A9DB3 /* UserDto.m in Sources */,
-				405D06CB1BFB678900591604 /* CapabilitiesDto.m in Sources */,
 				599D99F71A025F24008A9DB3 /* ManageUsersDB.m in Sources */,
 				599D99F11A0256F1008A9DB3 /* FMDatabaseAdditions.m in Sources */,
 				599D80A31A23366D0071B66E /* SimpleFileListTableViewController.m in Sources */,
@@ -5083,7 +5114,6 @@
 				4056551E1CE1DD67001266EE /* UtilsFileSystem.m in Sources */,
 				EA1F62CE1A5EBC2A00D6346F /* UserDto.m in Sources */,
 				EA1F62D01A5EBCAE00D6346F /* FMDatabase.m in Sources */,
-				405D06CA1BFB678800591604 /* CapabilitiesDto.m in Sources */,
 				EA1F62D81A5EBFC700D6346F /* ManageUsersDB.m in Sources */,
 				EAE80E261A6D317C0061BD86 /* ManageUploadsDB.m in Sources */,
 				EA1F62D71A5EBF8500D6346F /* ManageFilesDB.m in Sources */,

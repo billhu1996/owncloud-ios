@@ -6,7 +6,7 @@
 //
 
 /*
- Copyright (C) 2016, ownCloud GmbH.
+ Copyright (C) 2017, ownCloud GmbH.
  This code is covered by the GNU Public License Version 3.
  For distribution utilizing Apple mechanisms please see https://owncloud.org/contribute/iOS-license-exception/
  You should have received a copy of this license
@@ -36,6 +36,7 @@
 #import "ShareMainViewController.h"
 #import "OCNavigationController.h"
 #import "ManageCapabilitiesDB.h"
+#import "CheckFeaturesSupported.h"
 
 
 //Three sections {shared items - not shared items msg - not share api support msg}
@@ -94,13 +95,9 @@
 - (void)viewWillAppear:(BOOL)animated{
     [super viewWillAppear:animated];
     
-    if (IS_IOS8 || IS_IOS9) {
-        self.edgesForExtendedLayout = UIRectEdgeAll;
-        self.extendedLayoutIncludesOpaqueBars = true;
-        self.automaticallyAdjustsScrollViewInsets = true;
-    }else{
-        self.edgesForExtendedLayout = UIRectCornerAllCorners;
-    }
+    self.edgesForExtendedLayout = UIRectEdgeAll;
+    self.extendedLayoutIncludesOpaqueBars = true;
+    self.automaticallyAdjustsScrollViewInsets = true;
     
     //Get offline data
     [self refreshWithDataBaseSharedItems];
@@ -109,12 +106,12 @@
     //Set the table footer
     [self setTheLabelOnTheTableFooter];
     
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
         //Do operations in background thread
         //If the server has not been checked, do it
         AppDelegate *app = (AppDelegate*)[[UIApplication sharedApplication] delegate];
         if (app.activeUser.hasShareApiSupport == serverFunctionalityNotChecked) {
-            [app checkIfServerSupportThings];
+            [CheckFeaturesSupported updateServerFeaturesAndCapabilitiesOfActiveUser];
         }
         
         //Do the request to get the shared items
@@ -144,38 +141,29 @@
 
 -(void)viewDidLayoutSubviews
 {
-    
-    if (IS_IOS8 || IS_IOS9) {
+    if ([self.sharedTableView respondsToSelector:@selector(setSeparatorInset:)]) {
+        [self.sharedTableView setSeparatorInset:UIEdgeInsetsMake(0, 10, 0, 0)];
+    }
         
-        if ([self.sharedTableView respondsToSelector:@selector(setSeparatorInset:)]) {
-            [self.sharedTableView setSeparatorInset:UIEdgeInsetsMake(0, 10, 0, 0)];
-        }
-        
-        if ([self.sharedTableView respondsToSelector:@selector(setLayoutMargins:)]) {
-            [self.sharedTableView setLayoutMargins:UIEdgeInsetsZero];
-        }
+    if ([self.sharedTableView respondsToSelector:@selector(setLayoutMargins:)]) {
+        [self.sharedTableView setLayoutMargins:UIEdgeInsetsZero];
+    }
         
         
-        CGRect rect = self.navigationController.navigationBar.frame;
-        float y = rect.size.height + rect.origin.y;
-        self.sharedTableView.contentInset = UIEdgeInsetsMake(y,0,0,0);
-        
-    }}
+    CGRect rect = self.navigationController.navigationBar.frame;
+    float y = rect.size.height + rect.origin.y;
+    self.sharedTableView.contentInset = UIEdgeInsetsMake(y,0,0,0);
+}
 
 -(void)tableView:(UITableView *)tableView willDisplayCell:(UITableViewCell *)cell forRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    
-    if (IS_IOS8 || IS_IOS9) {
-        if ([self.sharedTableView respondsToSelector:@selector(setSeparatorInset:)]) {
-            [self.sharedTableView setSeparatorInset:UIEdgeInsetsMake(0, 10, 0, 0)];
-        }
-        
-        if ([self.sharedTableView respondsToSelector:@selector(setLayoutMargins:)]) {
-            [self.sharedTableView setLayoutMargins:UIEdgeInsetsZero];
-        }
-        
+    if ([self.sharedTableView respondsToSelector:@selector(setSeparatorInset:)]) {
+        [self.sharedTableView setSeparatorInset:UIEdgeInsetsMake(0, 10, 0, 0)];
     }
     
+    if ([self.sharedTableView respondsToSelector:@selector(setLayoutMargins:)]) {
+        [self.sharedTableView setLayoutMargins:UIEdgeInsetsZero];
+    }
 }
 
 
@@ -374,11 +362,13 @@
                     //Sorted by share time
                     _sharedLinkItems = [self getArraySortByShareDate:_sharedLinkItems];
                     
-                    //Refresh the list of share items
-                    [_sharedTableView reloadData];
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                        //Refresh the list of share items
+                        [_sharedTableView reloadData];
                     
-                    //Stop loading pull refresh
-                    [self stopPullRefresh];
+                        //Stop loading pull refresh
+                        [self stopPullRefresh];
+                     });
                 }
                 
                 //Finish the refresh
@@ -410,8 +400,13 @@
                     //Sorted by share time
                     _sharedLinkItems = [self getArraySortByShareDate:_sharedLinkItems];
                     
-                    //Refresh the list of share items
-                    [_sharedTableView reloadData];
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                        //Refresh the list of share items
+                        [_sharedTableView reloadData];
+                        
+                        //Stop loading pull refresh
+                        [self stopPullRefresh];
+                    });
                     
                     DLog(@"error: %@", error);
                     DLog(@"Operation error: %ld", (long)response.statusCode);
@@ -421,10 +416,6 @@
 
                         [self.manageNetworkErrors manageErrorHttp:response.statusCode andErrorConnection:error andUser:app.activeUser];
                     }
-                    
-                    //Stop loading pull refresh
-                    [self stopPullRefresh];
-                
                 }
                 
                 //Finish the refresh
@@ -436,10 +427,13 @@
             _sharedLinkItems = nil;
             _sharedLinkItems = [NSArray new];
             
-            [_sharedTableView reloadData];
+            dispatch_async(dispatch_get_main_queue(), ^{
+                //Refresh the list of share items
+                [_sharedTableView reloadData];
             
-            //Stop loading pull refresh
-            [self stopPullRefresh];
+                //Stop loading pull refresh
+                [self stopPullRefresh];
+            });
             
             //Finish the refresh
             _isRefreshSharedInProgress = NO;
@@ -456,8 +450,10 @@
  * This method called the app delegate error login
  */
 - (void)errorLogin{
-    //Stop loading pull refresh
-    [self stopPullRefresh];
+    dispatch_async(dispatch_get_main_queue(), ^{
+        //Stop loading pull refresh
+        [self stopPullRefresh];
+    });
     
     AppDelegate *app = (AppDelegate *)[[UIApplication sharedApplication]delegate];
     [app errorLogin];
@@ -667,7 +663,7 @@
 
         //Obtain the path where the folder will be created in the file system
         NSString *rootPath = [NSString stringWithFormat:@"%@", newFolder.filePath];
-        NSString *currentLocalFileToCreateFolder = [NSString stringWithFormat:@"%@%ld/%@",[UtilsUrls getOwnCloudFilePath],(long)app.activeUser.idUser,[rootPath stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding]];
+        NSString *currentLocalFileToCreateFolder = [NSString stringWithFormat:@"%@%ld/%@",[UtilsUrls getOwnCloudFilePath],(long)app.activeUser.idUser,[rootPath stringByRemovingPercentEncoding]];
         //Remove the "/"
         NSString *name = [newFolder.fileName substringToIndex:[newFolder.fileName length]-1];
         
@@ -717,8 +713,7 @@
 
 - (void) createFolderPathInFileSystemWithThisPath:(NSString*)path{
     
-    path = [path stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
-    //DLog(@"path: %@", path);
+    path = [path stringByRemovingPercentEncoding];
     
     if (![[NSFileManager defaultManager] fileExistsAtPath:path]) {
         NSError *error = nil;
@@ -746,7 +741,7 @@
     //If the server has not been checked, do it
     AppDelegate *app = (AppDelegate*)[[UIApplication sharedApplication] delegate];
     if (app.activeUser.hasShareApiSupport == serverFunctionalityNotChecked) {
-        [app checkIfServerSupportThings];
+         [CheckFeaturesSupported updateServerFeaturesAndCapabilitiesOfActiveUser];
     }
     refresh.attributedTitle = nil;
     [self performSelector:@selector(refreshSharedItems) withObject:nil];
@@ -1040,7 +1035,7 @@
                 [tableView deselectRowAtIndexPath:indexPath animated:YES];
                 
                 DLog(@"File name is: %@", file.fileName);
-                FilePreviewViewController *viewController = [[FilePreviewViewController alloc]initWithNibName:@"FilePreviewViewController" selectedFile:file];
+                FilePreviewViewController *viewController = [[FilePreviewViewController alloc]initWithNibName:@"FilePreviewViewController" selectedFile:file andIsForceDownload:NO];
                 viewController.hidesBottomBarWhenPushed = YES;
                 viewController.sortedArray=sortArray;
                 
@@ -1064,9 +1059,8 @@
                 _selectedCell = indexPath;
                 
                 AppDelegate *app = (AppDelegate *)[[UIApplication sharedApplication]delegate];
-                
                 app.detailViewController.sortedArray=sortArray;
-                [app.detailViewController handleFile:file fromController:sharedViewManagerController];
+                [app.detailViewController handleFile:file fromController:sharedViewManagerController andIsForceDownload:NO];
                 
                 ShareLinkCell *sharedLink = (ShareLinkCell*) [_sharedTableView cellForRowAtIndexPath:indexPath];
                 [sharedLink setSelectedStrong:YES];
@@ -1197,7 +1191,7 @@
             self.mShareFileOrFolder = [ShareFileOrFolder new];
             self.mShareFileOrFolder.delegate = self;
             
-            [self.mShareFileOrFolder unshareTheFile:sharedDto];
+            [self.mShareFileOrFolder unshareTheFileByIdRemoteShared:sharedDto.idRemoteShared];
             [cell hideUtilityButtonsAnimated:YES];
             
             //Refresh the list of share items

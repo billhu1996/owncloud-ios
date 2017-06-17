@@ -6,7 +6,7 @@
 //
 
 /*
-Copyright (C) 2016, ownCloud GmbH.
+Copyright (C) 2017, ownCloud GmbH.
 This code is covered by the GNU Public License Version 3.
 For distribution utilizing Apple mechanisms please see https://owncloud.org/contribute/iOS-license-exception/
 You should have received a copy of this license
@@ -21,6 +21,7 @@ class ShareLinkHeaderCell:UITableViewCell {
     
     @IBOutlet weak var titleSection: UILabel!
     @IBOutlet weak var switchSection: UISwitch!
+    @IBOutlet weak var addButtonSection: UIButton!
     
     override func awakeFromNib() {
         super.awakeFromNib()
@@ -40,6 +41,8 @@ class ShareLinkHeaderCell:UITableViewCell {
         
         self.contentView.backgroundColor = UIColor.ofNavigationBar()
         titleSection.textColor = UIColor.ofNavigationTitle()
+        
+        addButtonSection.setTitleColor(UIColor.ofNavigationTitle(), for: .normal)
     }
     
 }

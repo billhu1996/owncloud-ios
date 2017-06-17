@@ -28,8 +28,6 @@
 + (UIColor*)colorOfNavigationTitle;
 //Color of items in navigation bar
 + (UIColor*)colorOfNavigationItems;
-//Color of background in custom status bar, only for iOS 7
-+ (UIColor*)colorOfBackgroundStatusBarNotification;
 //Tint color of tool bar
 + (UIColor*)colorOfToolBar;
 //Color of background view in toolBar bar, only for iOS 7 for transparency
@@ -66,8 +64,6 @@
 + (UIColor*)colorOfLoginText ;
 //Text color of error credentials
 + (UIColor*)colorOfLoginErrorText;
-//Text color of server error
-+ (UIColor*)colorOfServerErrorText;
 //Background color of top of login view, in logo image view
 + (UIColor*)colorOfLoginTopBackground;
 //Background color of login button
@@ -95,6 +91,9 @@
 //Color of background in detail view when there are not file selected
 + (UIColor*)colorOfBackgroundDetailViewiPad;
 
+
+//SHARE VIEW Public Link, backgroung of cell to warning about sharing public link
++ (UIColor*)colorOfBackgroundWarningSharingPublicLink;
 
 @end
 

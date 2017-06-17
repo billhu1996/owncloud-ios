@@ -33,6 +33,7 @@
 #import "OCURLSessionManager.h"
 #import "ManageAppSettingsDB.h"
 #import "UtilsCookies.h"
+#import "OCCommunication.h"
 
 #define k_delay_after_check_instant_uploads_folders 2.0
 
@@ -212,7 +213,7 @@
         DLog(@"Operation error: %ld", (long)response.statusCode);
         
     } errorBeforeRequest:^(NSError *error) {
-        if (error.code == OCErrorForbidenCharacters) {
+        if (error.code == OCErrorForbiddenCharacters) {
             DLog(@"The folder have problematic characters");
         } else {
             DLog(@"The folder have problems under controlled");
@@ -245,6 +246,7 @@
     }
     
     [[AppDelegate sharedOCCommunication] setUserAgent:[UtilsUrls getUserAgent]];
+    
     
     NSString *urlClean = [NSString stringWithFormat:@"%@%@", _currentUpload.destinyFolder, _currentUpload.uploadFileName];
     urlClean = [urlClean stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
@@ -355,7 +357,7 @@
                     [self finishOverwriteProcess];
                 }
                 
-                if (error.code == OCServerErrorForbiddenCharacters) {
+                if (error.code == OCErrorForbiddenCharacters) {
                     weakSelf.currentUpload.status = errorUploading;
                     weakSelf.currentUpload.kindOfError = errorInvalidPath;
                     [ManageUploadsDB setStatus:errorUploading andKindOfError:weakSelf.currentUpload.kindOfError byUploadOffline:weakSelf.currentUpload];
@@ -378,7 +380,12 @@
                             break;
                         case kOCErrorServerForbidden:
                             weakSelf.currentUpload.status = errorUploading;
-                            weakSelf.currentUpload.kindOfError = errorNotPermission;
+                            if (error.code == OCErrorForbiddenWithSpecificMessage) {
+                                weakSelf.currentUpload.kindOfError = errorFirewallRuleNotAllowUpload;
+                            } else {
+                                weakSelf.currentUpload.kindOfError = errorNotPermission;
+                            }
+                            
                             [ManageUploadsDB setStatus:errorUploading andKindOfError:weakSelf.currentUpload.kindOfError byUploadOffline:weakSelf.currentUpload];
                             break;
                         case kOCErrorProxyAuth:
@@ -689,6 +696,17 @@
     
     _currentUpload.uploadedDate = [_date timeIntervalSince1970];
     
+}
+
+
+/*
+ * Method called when the server has changed the url and it's necessary to 
+ * restart the pending uploads with the right new server
+ */
+
+- (void) refreshPathOfUploadAfterServerChangeUrl {
+    NSString *relativePath = [UtilsUrls getRelativePathOfFullDestintyPath:_currentUpload.destinyFolder];
+    _currentUpload.destinyFolder = [NSString stringWithFormat:@"%@%@%@",[UtilsUrls getFullRemoteServerPath:APP_DELEGATE.activeUser], k_url_webdav_server_without_last_slash, relativePath];
 }
 
 

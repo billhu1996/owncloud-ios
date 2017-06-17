@@ -19,6 +19,13 @@
 #import "SSOViewController.h"
 #import "CheckSSOServer.h"
 
+typedef NS_ENUM (NSInteger, LoginMode){
+    LoginModeCreate,
+    LoginModeUpdate,
+    LoginModeExpire,
+    LoginModeMigrate,
+};
+
 extern NSString *loginViewControllerRotate;
 
 @interface LoginViewController : UIViewController <UITextFieldDelegate, UITableViewDataSource, UITableViewDelegate, MBProgressHUDDelegate, CheckAccessToServerDelegate, SSODelegate, CheckSSOServerDelegate, ManageNetworkErrorsDelegate> {
@@ -44,8 +51,6 @@ extern NSString *loginViewControllerRotate;
     UITextField *_usernameTextField;
     UITextField *_passwordTextField;
     
-    //Alert
-    UIAlertView *_alert;
     
     //Flags
     BOOL isUserTextUp;
@@ -57,11 +62,12 @@ extern NSString *loginViewControllerRotate;
     BOOL isCheckingTheServerRightNow;
     BOOL isSSLAccepted;
     BOOL isErrorOnCredentials;
-    BOOL isError500;
     BOOL isLoginButtonEnabled;
     BOOL urlEditable;
     BOOL userNameEditable;
     BOOL hasInvalidAuth;
+    
+    
     
     
 }
@@ -78,7 +84,6 @@ extern NSString *loginViewControllerRotate;
 @property(nonatomic,strong) NSString *auxPasswordForShowPasswordOnEdit;
 
 @property(nonatomic,strong) NSString *connectString;
-@property(nonatomic,strong) NSString *loginButtonString;
 
 @property(nonatomic)CGRect txtWithLogoWhenNoURLFrame;
 @property(nonatomic)CGRect urlFrame;
@@ -89,8 +94,10 @@ extern NSString *loginViewControllerRotate;
 
 @property(nonatomic,strong) ManageNetworkErrors *manageNetworkErrors;
 
+@property (nonatomic) LoginMode loginMode;
 
--(void)setTableBackGroundColor;
+@property (nonatomic, strong) NSString *errorMessage;
+
 -(void)checkUrlManually;
 -(void)hideOrShowPassword;
 -(void)goTryToDoLogin;
@@ -99,9 +106,14 @@ extern NSString *loginViewControllerRotate;
 -(void) hideTryingToLogin;
 -(void) potraitViewiPhone;
 -(void) addEditAccountsViewiPad;
-//-----------------------------------
-/// @name restoreTheCookiesOfActiveUserByNewUser
-///-----------------------------------
 - (void) restoreTheCookiesOfActiveUser;
+
+- (id)initWithLoginMode:(LoginMode)loginMode;
+
+- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil andLoginMode:(LoginMode)loginMode;
+
+- (void)setBarForCancelForLoadingFromModal;
+
+- (void) closeViewController;
 
 @end

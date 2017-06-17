@@ -315,7 +315,7 @@
                 [self endLoading];
                 break;
                 
-            case OCErrorMovingFolderInsideHimself:
+            case OCErrorMovingFolderInsideItself:
                 [self showError:NSLocalizedString(@"error_folder_destiny_is_the_same", nil)];
                 break;
                 
@@ -514,7 +514,7 @@
     
     if ([app isMediaPlayerRunningWithThisFilePath: oldPath]) {
         NSString *pathOfNewFile = [NSString stringWithFormat:@"%@%@",_currentLocalFolder, _mNewName];
-        app.mediaPlayer.urlString = pathOfNewFile;
+        app.avMoviePlayer.urlString = pathOfNewFile;
     }
     
     if ([(NSObject*)self.delegate respondsToSelector:@selector(reloadTableFromDataBase)]) {

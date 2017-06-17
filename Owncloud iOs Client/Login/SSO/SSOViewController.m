@@ -9,7 +9,7 @@
 //
 
 /*
- Copyright (C) 2016, ownCloud GmbH.
+ Copyright (C) 2017, ownCloud GmbH.
  This code is covered by the GNU Public License Version 3.
  For distribution utilizing Apple mechanisms please see https://owncloud.org/contribute/iOS-license-exception/
  You should have received a copy of this license
@@ -63,6 +63,16 @@ static NSString *const tmpFileName = @"tmp.der";
             _manageNetworkErrors = [ManageNetworkErrors new];
             _manageNetworkErrors.delegate = self;
         }
+        
+        AppDelegate *app = (AppDelegate *)[[UIApplication sharedApplication]delegate];
+
+        if (app.activeUser) {
+            //1- Storage the active account cookies on the Database
+            [UtilsCookies setOnDBStorageCookiesByUser:app.activeUser];
+        }
+        //2- Delete the current cookies because we delete the current active user
+        [UtilsFramework deleteAllCookies];
+
     }
     return self;
 }
@@ -71,16 +81,6 @@ static NSString *const tmpFileName = @"tmp.der";
     
     [super viewWillAppear:animated];
     
-    AppDelegate *app = (AppDelegate *)[[UIApplication sharedApplication]delegate];
-    
-    if (app.activeUser) {
-        //1- Storage the active account cookies on the Database
-        [UtilsCookies setOnDBStorageCookiesByUser:app.activeUser];
-    }
-    //2- Delete the current cookies because we delete the current active user
-    [UtilsFramework deleteAllCookies];
-    
-    [self openLink:_urlString];
 }
 
 - (void) viewWillDisappear:(BOOL)animated {
@@ -90,6 +90,8 @@ static NSString *const tmpFileName = @"tmp.der";
 - (void)viewDidLoad
 {
     [super viewDidLoad];
+    
+    [self openLink:_urlString];
     
     UIBarButtonItem *cancelButton = [[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"cancel", nil) style:UIBarButtonItemStylePlain target:self action:@selector(cancel:)];
     self.navigationItem.rightBarButtonItem = cancelButton;
@@ -186,27 +188,6 @@ static NSString *const tmpFileName = @"tmp.der";
     [self performSelector:@selector(delay) withObject:nil afterDelay:15.0];
     
     return YES;
-    
-//    NSLog(@"Did start loading: %@ auth:%d", [[request URL] absoluteString], _authenticated);
-//    
-//    if (!_authenticated) {
-//        _authenticated = NO;
-//        
-//        self.connection = [[NSURLConnection alloc] initWithRequest:request delegate:self];
-//        
-//        [self.connection start];
-//        
-//        return NO;
-//    }
-    
-//    if (self.authenticated)
-//    {
-//        self.connection = [[NSURLConnection alloc] initWithRequest:request delegate:self];
-//        [self.connection start];
-//        return NO;
-//    }
-    
-    return YES;
 }
 
 - (void) delay {
@@ -219,7 +200,6 @@ static NSString *const tmpFileName = @"tmp.der";
     DLog(@"An error happened during load: %@", error);
     
     if ([error code] != -999) {
-        [_activity stopAnimating];
         [_webView setHidden:NO];
     }
     
@@ -235,13 +215,13 @@ static NSString *const tmpFileName = @"tmp.der";
                 [self askToAcceptCertificate];
             }
           
-
         }
     }
 }
 
 - (void)webViewDidStartLoad:(UIWebView *)webView {
     DLog(@"_webViewDidStartLoad_: %@", webView.request.URL.absoluteString);
+    self.isLoading = true;
     
     [_webView endEditing:YES];
     
@@ -257,8 +237,8 @@ static NSString *const tmpFileName = @"tmp.der";
 }
 
 -(void)webViewDidFinishLoad:(UIWebView *)webView {
-    
     DLog(@"_webViewDidFinishLoad_");
+    self.isLoading = false;
     
     [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(delay) object:nil];
     
@@ -400,11 +380,27 @@ static NSString *const tmpFileName = @"tmp.der";
     DLog(@"Error connection: %@", error);
     
     //Too many HTTP redirects error. This error happens sometimes.
-    if (error.code == -1007) {
+    if (error.code == kCFURLErrorHTTPTooManyRedirects) {
         UIAlertView *alert = [[UIAlertView alloc] initWithTitle:NSLocalizedString(@"unknow_response_server", nil) message:NSLocalizedString(@"", nil) delegate:nil cancelButtonTitle:NSLocalizedString(@"ok", nil) otherButtonTitles:nil];
         [alert show];
-        [self retry:nil];
+        
+        [self initParemetersAndRetryOpenLink];
+        
+    } else if ([error.domain isEqualToString: NSURLErrorDomain]) {
+        
+        if (error.code == kCFURLErrorServerCertificateUntrusted         ||
+            error.code == kCFURLErrorServerCertificateHasBadDate        ||
+            error.code == kCFURLErrorServerCertificateHasUnknownRoot    ||
+            error.code == kCFURLErrorServerCertificateNotYetValid)
+        {
+            
+            if (![[CheckAccessToServer sharedManager] isTemporalCertificateTrusted]) {
+                [self initParemetersAndRetryOpenLink];
+            }
+        }
     }
+    
+    
 }
 
 - (BOOL)connectionShouldUseCredentialStorage:(NSURLConnection *)connection;
@@ -463,6 +459,10 @@ static NSString *const tmpFileName = @"tmp.der";
  *  This method repeat the original request that shown the initial UIWebView
  */
 - (IBAction)retry:(id)sender {
+    [self initParemetersAndRetryOpenLink];
+}
+
+- (void) initParemetersAndRetryOpenLink {
     self.isCredentialsWritten = NO;
     self.user = nil;
     self.password = nil;
@@ -504,7 +504,7 @@ static NSString *const tmpFileName = @"tmp.der";
         
         if (!jsonDict) {
             //Error
-            // DLog(@"json error: %@", jsonError);
+            DLog(@"json error: %@", jsonError);
         } else {
             
             //Get the ocs dictionary object
@@ -526,7 +526,7 @@ static NSString *const tmpFileName = @"tmp.der";
         
         userName = nil;
         
-        [self.manageNetworkErrors returnSuitableWebDavErrorMessage:response.statusCode];
+        [self.manageNetworkErrors returnErrorMessageWithHttpStatusCode:response.statusCode andError:error];
         
         //Error we do not have user
         dispatch_semaphore_signal(semaphore);

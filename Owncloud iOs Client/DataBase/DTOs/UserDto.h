@@ -13,8 +13,7 @@
  along with this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.en.html>.
  */
 
-#import <Foundation/Foundation.h>
-#import "CapabilitiesDto.h"
+#import "OCCapabilities.h"
 
 typedef enum {
     serverFunctionalityNotChecked = 0,
@@ -44,6 +43,7 @@ typedef enum {
 @property NSInteger hasForbiddenCharactersSupport;
 @property NSInteger hasCapabilitiesSupport;
 @property NSInteger hasFedSharesOptionShareSupport;
+@property NSInteger hasPublicShareLinkOptionNameSupport;
 @property BOOL imageInstantUpload;
 @property BOOL videoInstantUpload;
 @property BOOL backgroundInstantUpload;
@@ -52,7 +52,8 @@ typedef enum {
 @property NSTimeInterval timestampInstantUploadImage;
 @property NSTimeInterval timestampInstantUploadVideo;
 @property (nonatomic, copy) NSString *urlRedirected;
-@property (nonatomic, strong) CapabilitiesDto *capabilitiesDto;
+@property (nonatomic, strong) OCCapabilities *capabilitiesDto;
 @property enumSortingType sortingType;
+@property (nonatomic, copy) NSString *predefinedUrl;
 
 @end

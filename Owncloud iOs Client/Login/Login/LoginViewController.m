@@ -54,19 +54,50 @@ NSString *loginViewControllerRotate = @"loginViewControllerRotate";
 
 @implementation LoginViewController
 
-- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil {
+- (id)initWithLoginMode:(LoginMode)loginMode {
+    
+    NSString *nibName = nil;
+    NSBundle *bundle = nil;
+    
+    if (IS_IPHONE) {
+        nibName = @"LoginViewController_iPhone";
+    } else {
+         nibName = @"LoginViewController_iPad";
+    }
+    
+    self = [self initWithNibName:nibName bundle:bundle andLoginMode:(LoginMode)loginMode];
+    
+    return self;
+}
+
+- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil andLoginMode:(LoginMode)loginMode {
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
     if (self) {
+        _loginMode = loginMode;
         self.auxUrlForReloadTable = k_default_url_server;
         self.auxUsernameForReloadTable = @"";
         self.auxPasswordForReloadTable = @"";
         
-        urlEditable = YES;
-        userNameEditable = YES;
+        if (_loginMode==LoginModeExpire){
+            isErrorOnCredentials = YES;
+        } else {
+            isErrorOnCredentials = NO;
+        }
+        
+        if (_loginMode == LoginModeCreate || _loginMode == LoginModeMigrate) {
+            urlEditable = YES;
+        } else {
+            urlEditable = NO;
+        }
+        
+        if (loginMode == LoginModeCreate || loginMode == LoginModeMigrate) {
+            userNameEditable = YES;
+        } else {
+            userNameEditable = NO;
+        }
         
         isSSLAccepted = YES;
-        isErrorOnCredentials = NO;
-        isError500 = NO;
+        self.errorMessage = nil;
         isCheckingTheServerRightNow = NO;
         isConnectionToServer = NO;
         isNeedToCheckAgain = YES;
@@ -99,7 +130,6 @@ NSString *loginViewControllerRotate = @"loginViewControllerRotate";
     
     //Configure view for interface position
     [self configureViewForInterfacePosition];
-    [self internazionaliceTheInitialInterface];
     
     isLoginButtonEnabled = NO;
     
@@ -152,6 +182,7 @@ NSString *loginViewControllerRotate = @"loginViewControllerRotate";
 }
 
 - (void)setTableBackGroundColor {
+    [self.tableView setBackgroundView: nil];
     [self.tableView setBackgroundColor:[UIColor colorOfLoginBackground]];
 }
 
@@ -182,15 +213,6 @@ NSString *loginViewControllerRotate = @"loginViewControllerRotate";
     // Dispose of any resources that can be recreated.
 }
 
-
-#pragma markt - Internacionalization
-
--(void)internazionaliceTheInitialInterface {
-    
-    self.loginButtonString = NSLocalizedString(@"login", nil);
-    //[loginButton setTitle:NSLocalizedString(@"login", nil) forState:UIControlStateNormal];
-    //[cancelButton setTitle:NSLocalizedString(@"cancel", nil) forState:UIControlStateNormal];
-}
 #pragma mark - Draw Position
 
 ///-----------------------------------
@@ -1022,7 +1044,7 @@ NSString *loginViewControllerRotate = @"loginViewControllerRotate";
 -(AccountCell *) configureCellToLoginByAccountCell:(AccountCell *) cell {
     
     cell.textLabel.textAlignment = NSTextAlignmentCenter;
-    cell.textLabel.text=self.loginButtonString;
+    cell.textLabel.text= NSLocalizedString(@"login", nil);
     cell.textLabel.textColor = [UIColor colorOfLoginButtonTextColor];
   //  cell.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"gradImage.png"]];
     cell.backgroundColor = [UIColor colorOfLoginButtonBackground];
@@ -1248,6 +1270,9 @@ NSString *loginViewControllerRotate = @"loginViewControllerRotate";
                     UIButton *button = [self setTheButtonForReconnectWithTheCurrentServer];
                     [view addSubview:button];
                 }
+            } else if(self.loginMode == LoginModeMigrate){
+                errorImage = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"CredentialsError.png"]];
+                label.text = NSLocalizedString(@"error_updating_predefined_url",nil);
             } else {
                 errorImage = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"CredentialsError.png"]];
                 label.text = NSLocalizedString(@"connection_declined",nil);
@@ -1316,60 +1341,53 @@ NSString *loginViewControllerRotate = @"loginViewControllerRotate";
 
 -(UIView *) generateFooterForUsernameAndPassword {
     
-    if(isError500) {
-        UIImageView *errorImage = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"CredentialsError.png"]];
-        [errorImage setFrame:okNokImageFrameFooter];
-        
-        UILabel* label = [[UILabel alloc] initWithFrame:textFooterFrame2];
-        label.backgroundColor = [UIColor clearColor];
-        label.text = NSLocalizedString(@"unknow_response_server",nil);
-        label.baselineAdjustment= UIBaselineAdjustmentAlignCenters;
-        label.lineBreakMode     =  NSLineBreakByWordWrapping;
-        label.textAlignment     = NSTextAlignmentLeft;
-        label.font          = [UIFont fontWithName:@"Arial" size:13];
-        label.textColor     = [UIColor colorOfLoginErrorText];
-        label.numberOfLines = 0;
-        
-        
-        UIView *view = [[UIView alloc] initWithFrame:footerSection1Frame];
-        
-        [view addSubview:errorImage];
-        [view addSubview:label];
-        
-        return view;
-    }
+    NSString *errorMessage = @"";
     
-    if(isErrorOnCredentials) {
+    if (isErrorOnCredentials) {
         
-        UIImageView *errorImage = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"CredentialsError.png"]];
-        [errorImage setFrame:okNokImageFrameFooter];
-        
-        UILabel* label = [[UILabel alloc] initWithFrame:textFooterFrame2];
-        label.backgroundColor = [UIColor clearColor];
         //In SAML the error message is about the session expired
         if (k_is_sso_active) {
-            label.text = NSLocalizedString(@"session_expired",nil);
+            errorMessage = @"session_expired";
         }
         else{
-            label.text = NSLocalizedString(@"error_login_message",nil);
+            errorMessage = @"error_login_message";
         }
-        label.baselineAdjustment= UIBaselineAdjustmentAlignCenters;
-        label.lineBreakMode     = NSLineBreakByWordWrapping;
-        label.textAlignment     = NSTextAlignmentLeft;
-        label.font          = [UIFont fontWithName:@"Arial" size:13];
-        label.textColor     = [UIColor colorOfLoginErrorText];
-        label.numberOfLines = 0;
+
+    } else if (self.loginMode == LoginModeMigrate){
         
+        errorMessage = @"error_updating_predefined_url";
         
-        UIView *view = [[UIView alloc] initWithFrame:footerSection1Frame];
+    } else if (self.errorMessage) {
         
-        [view addSubview:errorImage];
-        [view addSubview:label];
+        errorMessage = self.errorMessage;
         
-        return view;
     } else {
+        
         return nil;
     }
+    
+    UIImageView *errorImage = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"CredentialsError.png"]];
+    [errorImage setFrame:okNokImageFrameFooter];
+    
+    UILabel* label = [[UILabel alloc] initWithFrame:textFooterFrame2];
+    label.backgroundColor = [UIColor clearColor];
+    
+    label.baselineAdjustment= UIBaselineAdjustmentAlignCenters;
+    label.lineBreakMode     =  NSLineBreakByWordWrapping;
+    label.textAlignment     = NSTextAlignmentLeft;
+    label.font          = [UIFont fontWithName:@"Arial" size:13];
+    label.textColor     = [UIColor colorOfLoginErrorText];
+    label.numberOfLines = 0;
+    
+    label.text = NSLocalizedString(errorMessage,nil);
+
+    UIView *view = [[UIView alloc] initWithFrame:footerSection1Frame];
+    
+    [view addSubview:errorImage];
+    [view addSubview:label];
+    
+    return view;
+    
 }
 
 #pragma mark - Keyboard
@@ -1615,7 +1633,7 @@ NSString *loginViewControllerRotate = @"loginViewControllerRotate";
         }
         
         if(textField == self.urlTextField) {
-            isError500 = NO;
+            self.errorMessage = nil;
         }
         
         if(textField == self.urlTextField && self.urlTextField.text.length > 0) {
@@ -1967,6 +1985,10 @@ NSString *loginViewControllerRotate = @"loginViewControllerRotate";
     //Update connect string
     [self updateConnectString];
     
+    [UtilsFramework deleteAllCookies];
+    [UtilsCookies eraseURLCache];
+    [UtilsCookies eraseCredentialsWithURL:self.connectString];
+    
     //Empty username and password to get a fail response to the server
     NSString *userName=@"";
     NSString *password=@"";
@@ -2021,7 +2043,7 @@ NSString *loginViewControllerRotate = @"loginViewControllerRotate";
                     isInvalid = NO;
                 }
             }else if (response != nil) {
-                [self.manageNetworkErrors returnSuitableWebDavErrorMessage:response.statusCode];
+                [self.manageNetworkErrors returnErrorMessageWithHttpStatusCode:response.statusCode andError:error];
             }
             
         } else {
@@ -2140,21 +2162,18 @@ NSString *loginViewControllerRotate = @"loginViewControllerRotate";
         DLog(@"error: %@", error);
         DLog(@"Operation error: %ld", (long)response.statusCode);
         
-        [self.manageNetworkErrors returnSuitableWebDavErrorMessage:response.statusCode];
-        
+        [self.manageNetworkErrors returnErrorMessageWithHttpStatusCode:response.statusCode andError:error];
     }];
     
 }
 
 
 - (void)showError:(NSString *) message {
-    
+    DLog(@"showError");
+    self.errorMessage = message;
+    [self hideTryingToLogin];
     dispatch_async(dispatch_get_main_queue(), ^{
-        [self hideTryingToLogin];
-        _alert = nil;
-        _alert = [[UIAlertView alloc] initWithTitle:message
-                                            message:@"" delegate:nil cancelButtonTitle:NSLocalizedString(@"ok", nil) otherButtonTitles:nil, nil];
-        [_alert show];
+        [self.tableView reloadData];
     });
 }
 
@@ -2176,11 +2195,8 @@ NSString *loginViewControllerRotate = @"loginViewControllerRotate";
    // DLog(@"Request Did Fetch Directory Listing And Test Authetification");
     
     if(requestCode >= 400) {
-        isError500 = YES;
-        [self hideTryingToLogin];
-        dispatch_async(dispatch_get_main_queue(), ^{
-            [self.tableView reloadData];
-        });
+        [self.manageNetworkErrors returnErrorMessageWithHttpStatusCode:requestCode
+                                                              andError:nil];
     } else {
         
         UserDto *userDto = [[UserDto alloc] init];
@@ -2211,6 +2227,7 @@ NSString *loginViewControllerRotate = @"loginViewControllerRotate";
         //Take into account that this global property can be stored bab value
         //For that we reset this property when the system check the server in LoginViewController class
         userDto.urlRedirected = app.urlServerRedirected;
+        userDto.predefinedUrl = k_default_url_server;
         
         [ManageUsersDB insertUser:userDto];
         
@@ -2250,6 +2267,7 @@ NSString *loginViewControllerRotate = @"loginViewControllerRotate";
         [self.tableView reloadData];
     });
 }
+
 
 #pragma mark - Cookies support
 //-----------------------------------
@@ -2299,7 +2317,7 @@ NSString *loginViewControllerRotate = @"loginViewControllerRotate";
 -(void)goTryToDoLogin {
     DLog(@"_goTryToDoLogin_ with user: %@ | pass: %@", self.usernameTextField.text, self.passwordTextField.text);
     
-    isError500 = NO;
+    self.errorMessage = nil;
     
     DLog(@"_goTryToDoLogin_ log2 urlTextField: %@ username:%@  isConnectionToServer%d : hasInvalidAuth: %d", self.urlTextField.text, self.usernameTextField.text, isConnectionToServer, hasInvalidAuth);
     if (self.urlTextField.text.length > 0 && self.usernameTextField.text.length > 0 && self.passwordTextField.text.length > 0 && isConnectionToServer && !hasInvalidAuth) {
@@ -2506,6 +2524,17 @@ NSString *loginViewControllerRotate = @"loginViewControllerRotate";
         DLog(@"saml user name is nil");
     }
 
+}
+
+
+- (void)setBarForCancelForLoadingFromModal {
+    
+    UIBarButtonItem *cancelButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemCancel target:self action:@selector(closeViewController)];
+    [self.navigationItem setLeftBarButtonItem:cancelButton];
+}
+
+- (void) closeViewController {
+    [self dismissViewControllerAnimated:YES completion:nil];
 }
 
 @end

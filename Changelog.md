@@ -1,3 +1,18 @@
+## 3.6.2 (June 2017)
+- Support for private links
+- Fix crash in public share links on iPads with iOS10 
+
+## 3.6.1 (June 2017)
+- Fix bug that restarted log-in process on two-factor authentication environments when app passcode was set
+
+## 3.6.0 (May 2017)
+- Video streaming
+- Multiple public links per file (OC X required)
+- Share with custom groups (OC X required)
+- Show & edit latex files
+- UX improvements
+- Bug fixing
+
 ## 3.5.3 (February 2017)
 - Added support for animated GIF images
 - Added more descriptive error message for maintenance mode
