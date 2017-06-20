@@ -687,8 +687,11 @@ NSString *loginViewControllerRotate = @"loginViewControllerRotate";
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
 {
     if(k_hide_url_server) {
-//        return 2;
-        return 3;//添加帮助URL
+        if ([@"https://pan.bistu.edu.cn" isEqualToString:k_default_url_server]) {
+            return 3;//添加帮助URL
+        } else {
+            return 2;
+        }
     } else {
         return 3;
     }
@@ -890,7 +893,7 @@ NSString *loginViewControllerRotate = @"loginViewControllerRotate";
             case 0:
 //                cell = [self configureCellToLoginByAccountCell:cell];
                 cell.textLabel.textAlignment = NSTextAlignmentCenter;//添加帮助URL
-                cell.textLabel.text= NSLocalizedString(@"首次登陆请看这里!!!", nil);
+                cell.textLabel.text= @"首次使用必读";
                 cell.textLabel.textColor = [UIColor blueColor];
                 cell.backgroundColor = [UIColor clearColor];
                 
@@ -1178,7 +1181,7 @@ NSString *loginViewControllerRotate = @"loginViewControllerRotate";
         }
         else if (indexPath.section == 2) {//添加帮助URL
             HelpViewController *helpViewController = [[HelpViewController alloc] initWithNibName:@"WebViewController" bundle:nil];
-            helpViewController.navigationTitleString = @"首次登陆帮助";
+            helpViewController.navigationTitleString = @"首次使用必读";
             helpViewController.urlString = @"https://site.bistu.edu.cn/iflab/owncloud_help/";
             UINavigationController *nav = [[UINavigationController alloc] initWithRootViewController:helpViewController];
             [self presentViewController:nav animated:YES completion:nil];
